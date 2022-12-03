@@ -1,3 +1,6 @@
+from typing import List
+
+
 def divide_items_into_compartments(items: str):
     return items[:len(items) // 2], items[len(items) // 2:]
 
@@ -15,6 +18,10 @@ def generate_priorities():
     return priorities
 
 
+def get_unique_per_group_of_3_people(line1: str, line2: str, line3: str):
+    return (set(line1) & set(line2) & set(line3)).pop()
+
+
 if __name__ == '__main__':
     with open("input.txt") as f:
         lines = f.read().split('\n')
@@ -25,3 +32,11 @@ if __name__ == '__main__':
     unique_items_priorities = [priorities[unique] for unique in uniques_items]
 
     print(f"Result 1: {sum(unique_items_priorities)}")
+
+    total_priority_for_groups_of_3_people = 0
+    for i in range(0, len(lines), 3):
+        unique_item = get_unique_per_group_of_3_people(lines[i], lines[i + 1], lines[i + 2])
+        total_priority_for_groups_of_3_people += priorities[unique_item]
+
+    print(f"Result 2: {total_priority_for_groups_of_3_people}")
+
