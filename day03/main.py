@@ -25,9 +25,9 @@ if __name__ == '__main__':
 
     print(f"Result 1: {sum(unique_items_priorities)}")
 
-    total_priority_for_groups_of_3_people = 0
-    for x in range(0, len(lines), 3):
-        unique_item = get_unique_item_per_group_of_3_people(lines[x], lines[x + 1], lines[x + 2])
-        total_priority_for_groups_of_3_people += priorities[unique_item]
+    total_priority_for_groups_of_3_people = sum([
+        priorities[get_unique_item_per_group_of_3_people(lines[x], lines[x + 1], lines[x + 2])]
+        for x in range(0, len(lines), 3)]
+    )
 
     print(f"Result 2: {total_priority_for_groups_of_3_people}")
