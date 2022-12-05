@@ -30,7 +30,7 @@ def parse_stacks_lines(stacks_lines: List[str]) -> List[List[str]]:
         line = stacks_lines.pop() + ' '  # add extra space so that we have consistently "[X] " pattern
         for i in range(0, len(line), 4):
             if line[i] == '[':
-                letter = line[i + 1]
+                letter = line[i + 1]  # from [X] extract X
                 stacks[i // 4].append(letter)
 
     return stacks
@@ -43,12 +43,15 @@ def parse_moves(lines: List[str]) -> List[Tuple[int, int, int]]:
     return [(x[0], x[1]-1, x[2]-1) for x in numbers]  # convert to 0-based indexes; assume only 3 elements
 
 
-def make_moves(stacks: List[List[str]], moves: List[Tuple[int, int, int]]) -> None:
+def make_moves(stacks: List[List[str]], moves: List[Tuple[int, int, int]], reverse: bool = False) -> List[List[str]]:
+    moves_stacks = [stack[:] for stack in stacks[:]]
     for count, src_index, dest_index in moves:
-        what_to_move = stacks[src_index][-count:]
+        what_to_move = moves_stacks[src_index][-count:]
+        what_to_move = what_to_move[::-1] if reverse else what_to_move
 
-        stacks[dest_index].extend(reversed(what_to_move))
-        stacks[src_index] = stacks[src_index][:-count]
+        moves_stacks[dest_index].extend(what_to_move)
+        moves_stacks[src_index] = moves_stacks[src_index][:-count]
+    return moves_stacks
 
 
 def get_topmost(stack: List[List[str]]) -> str:
@@ -63,6 +66,10 @@ if __name__ == '__main__':
 
     stacks = parse_stacks_lines(stacks_lines)
     moves = parse_moves(moves_lines)
-    make_moves(stacks, moves)
+    stacks1 = make_moves(stacks, moves, reverse=True)
 
-    print(f"Result 1: {get_topmost(stacks)}")
+    print(f"Result 1: {get_topmost(stacks1)}")
+
+    stacks2 = make_moves(stacks, moves, reverse=False)
+
+    print(f"Result 2: {get_topmost(stacks2)}")
