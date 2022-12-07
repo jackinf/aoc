@@ -1,5 +1,4 @@
 from collections import defaultdict
-from pprint import pprint
 from typing import List
 
 
@@ -44,11 +43,11 @@ def calculate_folder_sizes(disk):
 
     folder_sizes = defaultdict(int)
     for filename, filesize in files_only.items():
-        print(filename)
-        path = filename.split('/')
+        path = filename.split('/')[1:]
         while path:
             path.pop()
-            folder_sizes['/'.join(path)] += filesize
+            fullpath = '/'.join(path)
+            folder_sizes[fullpath] += filesize
 
     return folder_sizes
 
@@ -67,3 +66,13 @@ if __name__ == '__main__':
     result1 = sum(v for k,v in filtered_folder_sizes.items())
 
     print(f'Result 1: {result1}')
+
+    total_space = 70_000_000
+    req_unused_space = 30_000_000
+    curr_unused_space = total_space - folder_sizes['']
+    to_free_up = req_unused_space - curr_unused_space
+
+    for dir, size in sorted(folder_sizes.items(), key=lambda x: x[1]):
+        if size > to_free_up:
+            print(f'Result 2: {dir}, {size}')
+            break
