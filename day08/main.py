@@ -1,5 +1,3 @@
-from pprint import pprint
-
 def mark_edges_visible(visibles):
     for i in range(len(visibles)):
         visibles[i][0] = True
@@ -47,6 +45,35 @@ def calculate_visibles(visibles, grid, leftmax, rightmax, topmax, bottommax):
 
     return visibles
 
+def bruteforce_best_position(grid):
+    best_score = 1
+    for row in range(1, len(grid) - 1):
+        for col in range(1, len(grid[0]) - 1):
+            score = 1
+            for row2 in range(row + 1, len(grid)):
+                if grid[row2][col] >= grid[row][col]:
+                    break
+            score *= abs(row2 - row)
+
+            for row2 in range(row - 1, -1, -1):
+                if grid[row2][col] >= grid[row][col]:
+                    break
+            score *= abs(row2 - row)
+
+            for col2 in range(col + 1, len(grid[0])):
+                if grid[row][col2] >= grid[row][col]:
+                    break
+            score *= abs(col2 - col)
+
+            for col2 in range(col - 1, -1, -1):
+                if grid[row][col2] >= grid[row][col]:
+                    break
+            score *= abs(col2 - col)
+
+            best_score = max(score, best_score)
+
+    return best_score
+
 if __name__ == '__main__':
     with open('input.txt') as f:
         grid = [[int(x) for x in list(line.strip())] for line in f]
@@ -59,3 +86,6 @@ if __name__ == '__main__':
 
     print(f'Result 1: {total_visible}')
 
+    best_score = bruteforce_best_position(grid)
+
+    print(f'Result 2: {best_score}')
