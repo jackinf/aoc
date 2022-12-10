@@ -30,3 +30,18 @@ if __name__ == '__main__':
 
     print(f'Result 1: {sum(signal_strengths)}')
 
+    cols, rows = 40, 6
+    for i in range(cols * rows):
+        if i % cols == 0:
+            print()
+            print("#", end='')  # I don't know why
+
+        ii = (i % cols) + 1
+        vv = values[i + 1]
+
+        if ii -1 <= vv <= ii + 1:
+            print('#', end='')
+        else:
+            print('.', end='')
+
+    # Result 2: EJCFPGLH
