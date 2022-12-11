@@ -1,7 +1,7 @@
+import math
 import re
 from collections import defaultdict, Counter
 from dataclasses import dataclass
-from pprint import pprint
 from typing import List, Dict
 
 
@@ -25,16 +25,21 @@ class Monkey:
     monkey_target_if_true: int
     monkey_target_if_false: int
 
-    def inspect_items(self):
+    def inspect_items(self, reduce_worry):
         new_recipients = []
         while self.items:
             item = self.items.pop(0)
             p1, op, p2 = self.operation_args
             p1 = item if p1 == "old" else int(p1)
             p2 = item if p2 == "old" else int(p2)
+
             new_worry = calculate(p1, p2, op)
-            new_worry //= 3  # after monkey inspects an item but before throwing to another monkey
-            target = self.monkey_target_if_true if new_worry % self.divisible_by == 0 else self.monkey_target_if_false
+            new_worry = reduce_worry(new_worry)
+            if new_worry % self.divisible_by == 0:
+                target = self.monkey_target_if_true
+            else:
+                target = self.monkey_target_if_false
+
             new_recipients.append([target, new_worry])
         return new_recipients
 
@@ -42,19 +47,32 @@ class Monkey:
         self.items.append(item)
 
 class MonkeyManager:
-    def __init__(self, monkeys: Dict[int, Monkey]):
-        self.monkeys = monkeys
+    def __init__(self, lines: List[str], part1: bool):
+        self.monkeys: Dict[int, Monkey] = defaultdict(Monkey)
         self.counter = Counter()
+
+        # Parse monkeys
+        for i, line, in enumerate(lines):
+            if line.startswith('Monkey '):
+                monkey = extract_info(lines, i)
+                self.monkeys[monkey.index] = monkey
+
+        if part1:
+            factor = 3
+            self.worry_reducer = lambda x: x // factor
+        else:
+            factor = math.lcm(*[monkey.divisible_by for monkey in self.monkeys.values()])
+            self.worry_reducer = lambda x: x % factor
 
     def cycle_monkeys(self):
         for i, monkey in self.monkeys.items():
-            recipients = monkey.inspect_items()
+            recipients = monkey.inspect_items(self.worry_reducer)
             for target, new_worry in recipients:
                 self.monkeys[target].add_item(new_worry)
             self.counter[i] += len(recipients)  # keep track how many items have been inspected
 
     def output_monkey_standings(self):
-        for i, monkey in monkeys.items():
+        for i, monkey in self.monkeys.items():
             items_str = ', '.join(map(str, monkey.items))
             print(f'Monkey {i}. Inspected items: {self.counter[i]}. Current items: {items_str}')
 
@@ -82,21 +100,12 @@ if __name__ == '__main__':
     with open('input.txt') as f:
         lines = [line for line in f.read().split('\n')]
 
-    monkeys = defaultdict(Monkey)
-
-    # Parse monkeys
-    for i, line, in enumerate(lines):
-        if line.startswith('Monkey '):
-            monkey = extract_info(lines, i)
-            monkeys[monkey.index] = monkey
-
-    # Cycle monkeys
-    manager = MonkeyManager(monkeys)
+    manager1 = MonkeyManager(lines, part1=True)
     for i in range(20):
-        print(f"Cycle: {i+1}")
-        manager.cycle_monkeys()
-        manager.output_monkey_standings()
-        print()
+        manager1.cycle_monkeys()
+    print(f'Result 1: {manager1.calculate_monkey_business()}')
 
-    pprint(manager.counter)
-    print(f'Result 1: {manager.calculate_monkey_business()}')
+    manager2 = MonkeyManager(lines, part1=False)
+    for i in range(10_000):
+        manager2.cycle_monkeys()
+    print(f'Result 2: {manager2.calculate_monkey_business()}')
