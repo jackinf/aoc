@@ -1,0 +1,8 @@
+
+
+monkey_items:
+Monkey 0: 79, 98
+Monkey 1: 54, 65, 75, 74
+Monkey 2: 79, 60, 97
+Monkey 3: 74
+
