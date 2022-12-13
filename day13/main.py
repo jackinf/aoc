@@ -6,7 +6,37 @@ def is_arr(x):
     return isinstance(x, collections.abc.Sequence)
 
 def parse_arr(line: str):
-    return eval(line)  # I'm cheating here :) TODO: implement parsing
+    return parse_arr1(line, start=1)[0]  # or return eval(line)
+
+def parse_arr1(line: str, start):
+    st = []
+    val = ""
+    i = start
+    while i < len(line):
+        x = line[i]
+
+        if x == "[":
+            arr, j = parse_arr1(line, i+1)
+            st.append(arr)
+            i = j + 1
+            continue
+
+        if x == "]":
+            if val:
+                st.append(int(val))
+            return st, i
+
+        if x == ",":
+            if val:
+                st.append(int(val))
+            val = ""
+            i += 1
+            continue
+
+        val += x
+        i += 1
+
+    raise Exception("should be closed with ] at some point")
 
 
 def compare_pairs(left: Union[int, List], right: Union[int, List]) -> int:
