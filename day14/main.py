@@ -24,9 +24,10 @@ def find_min_max(collections: IntervalsCollection):
     ys = [item[1] for item in flattened]
 
     minx, maxx, miny, maxy = min(xs), max(xs), min(ys), max(ys)
-    offset = 2  # for safety to avoid index out of bounds
+    offsetx = 1  # In order to draw "floor" for Part 2. For Part 1, it's used as out-of-bonds
+    offsety = 200  # I guessed this number for "infinite" width for Part 2
 
-    return minx - offset, maxx + offset, miny - offset, maxy + offset
+    return minx - offsetx, maxx + offsetx, miny - offsety, maxy + offsety
 
 
 def get_width_height(minmax: MinMax) -> WidthHeight:
@@ -87,14 +88,26 @@ def draw_grid(grid: Grid):
     print()
 
 
-def pour_sand(sand_start: Tuple[int, int], grid: Grid):
-    while True:
+def pour_sand(sand_start: Tuple[int, int], grid: Grid, part: int = 1):
+    cycles = 100_000
+    while cycles > 0:
+        cycles -= 1
+
         row, col = sand_start
-        row += 1
         while True:
-            if is_oob((row + 1, col), grid):
+            if grid[row][col] == "o":
                 draw_grid(grid)
                 return
+
+            if is_oob((row + 1, col), grid):
+                if part == 1:
+                    draw_grid(grid)
+                    return
+
+                if part == 2:
+                    grid[row][col] = "o"
+                    break
+                continue
             grid[row][col] = "~"
 
             if grid[row + 1][col] in [".", "~"]:
@@ -132,8 +145,13 @@ if __name__ == '__main__':
     points_collection = convert_to_0_based(minmax, points_collection)
     sandx, sandy = convert_to_0_based(minmax, sand_coord_wrapped)[0][0]
 
-    grid = create_grid(wh, points_collection)
-    grid[sandx][sandy] = "+"
+    grid1 = create_grid(wh, points_collection)
+    grid1[sandx][sandy] = "+"
+    pour_sand((sandx, sandy), grid1, part=1)
 
-    pour_sand((sandx, sandy), grid)
-    print(f'Result 1: {count_sand(grid)}')
+    grid2 = create_grid(wh, points_collection)
+    grid2[sandx][sandy] = "+"
+    pour_sand((sandx, sandy), grid2, part=2)
+
+    print(f'Result 1: {count_sand(grid1)}')
+    print(f'Result 2: {count_sand(grid2)}')
