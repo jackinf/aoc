@@ -71,7 +71,7 @@ def convert_interval_to_points(intervals_collection: IntervalsCollection):
 
 def create_grid(wh: WidthHeight, points_collections: PointsCollection) -> Grid:
     width, height = wh
-    grid = [['.' for _ in range(width)] for _ in range(height)]
+    grid = [['.' for _ in range(height)] for _ in range(width)]
 
     for points in points_collections:
         for x, y in points:
@@ -84,13 +84,42 @@ def draw_grid(grid: Grid):
         for col in range(len(grid[0])):
             print(grid[row][col], end='')
         print()
+    print()
 
 
+def pour_sand(sand_start: Tuple[int, int], grid: Grid):
+    while True:
+        row, col = sand_start
+        row += 1
+        while True:
+            if is_oob((row + 1, col), grid):
+                draw_grid(grid)
+                return
+            grid[row][col] = "~"
 
+            if grid[row + 1][col] in [".", "~"]:
+                row += 1
+            elif grid[row + 1][col - 1] in [".", "~"]:
+                row += 1
+                col -= 1
+            elif grid[row + 1][col + 1] in [".", "~"]:
+                row += 1
+                col += 1
+            else:
+                grid[row][col] = "o"
+                break
+
+
+def is_oob(coord: Tuple[int, int], grid: Grid) -> bool:
+    return not (0 <= coord[0] < len(grid) and 0 <= coord[1] < len(grid[0]))
+
+
+def count_sand(grid: Grid):
+    return len([x for y in grid for x in y if x == "o"])
 
 
 if __name__ == '__main__':
-    with open('sample.txt') as f:
+    with open('input.txt') as f:
         lines = [line.strip() for line in f]
 
     sand_coord = (0, 500)
@@ -105,4 +134,6 @@ if __name__ == '__main__':
 
     grid = create_grid(wh, points_collection)
     grid[sandx][sandy] = "+"
-    draw_grid(grid)
+
+    pour_sand((sandx, sandy), grid)
+    print(f'Result 1: {count_sand(grid)}')
