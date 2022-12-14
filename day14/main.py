@@ -15,7 +15,7 @@ def parse_lines(lines: List[str]) -> IntervalsCollection:
         for item in items:
             pair = item.split(',')
             x, y = int(pair[0].strip()), int(pair[1].strip())
-            intervals[-1].append((x, y))
+            intervals[-1].append((y, x))
     return intervals
 
 def find_min_max(collections: IntervalsCollection):
@@ -75,7 +75,7 @@ def create_grid(wh: WidthHeight, points_collections: PointsCollection) -> Grid:
 
     for points in points_collections:
         for x, y in points:
-            grid[y][x] = "#"
+            grid[x][y] = "#"
 
     return grid
 
@@ -86,15 +86,23 @@ def draw_grid(grid: Grid):
         print()
 
 
+
+
+
 if __name__ == '__main__':
     with open('sample.txt') as f:
         lines = [line.strip() for line in f]
 
+    sand_coord = (0, 500)
+    sand_coord_wrapped = [[sand_coord]]
+
     intervals_collection = parse_lines(lines)
-    minmax = find_min_max(intervals_collection)
+    minmax = find_min_max(intervals_collection + sand_coord_wrapped)
     wh = get_width_height(minmax)
     points_collection = convert_interval_to_points(intervals_collection)
     points_collection = convert_to_0_based(minmax, points_collection)
+    sandx, sandy = convert_to_0_based(minmax, sand_coord_wrapped)[0][0]
 
     grid = create_grid(wh, points_collection)
+    grid[sandx][sandy] = "+"
     draw_grid(grid)
