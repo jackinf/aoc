@@ -1,0 +1,9 @@
+1. parse lines, create array of intervals (x, y)
+2. find minx, miny, maxx, maxy -> use them as offsets (also add +2 to offsets)
+3. create a grid (with offsets); fill stones with sand
+4. write a step function where sand travels 1 step
+    x. if down is OOB, then finish
+    a. if down is empty, then y + 1
+    b. elif down-left is empty, then x - 1, y + 1
+    c. elif down-right is empty, then x + 1, y + 1
+    d. else next sand
