@@ -61,16 +61,7 @@ def convert_sensors_to_yth_row(y: int, reaches: List[SensorReach]):
 
     return new_reaches
 
-def get_minmax(sb_pairs: List[SbPair]) -> MinMax:
-    xs = [a[0] for b in sb_pairs for a in b]
-    ys = [a[1] for b in sb_pairs for a in b]
-
-    min_x, max_x = min(xs), max(xs)
-    min_y, max_y = min(ys), max(ys)
-
-    return (min_x, max_x), (min_y, max_y)
-
-def convert_reaches_to_intervals(reaches: List[SensorReach]):
+def convert_reaches_to_intervals(y, reaches: List[SensorReach]):
     intervals: List[Interval] = []
 
     for reach in reaches:
@@ -100,7 +91,7 @@ def merge_yth_row_intervals(y: int, intervals: List[Interval]) -> List[Coord]:
         curr_start_x, curr_end_x = x_intervals[i]
 
         # expand previous interval
-        if curr_start_x <= prev_end_x <= curr_end_x:
+        if curr_start_x-1 <= prev_end_x <= curr_end_x:
             new_x_intervals[-1] = [prev_start_x, curr_end_x]
             continue
 
@@ -123,34 +114,55 @@ def count_occupied_cells(x_intervals: list[Coord], sensors_xs: List[int], beacon
     return total
 
 
-if __name__ == '__main__':
-    with open('input.txt') as f:
-        lines = [line.strip() for line in f]
-        y = 2000000
-
-    sb_pairs = parse(lines)
-
+def part1(sb_pairs: List[SbPair], y: int):
     # 1. calculate sensor half-heights (& half-widths) => call them "reach"
     reaches = calculate_reaches(sb_pairs)
 
     # 2. find sensors that reach the y-th row -> get xy-coord + "reach". Every time sensor moves down-up y-axis, reach is reduced by 1
-    reaches = convert_sensors_to_yth_row(y, reaches)
+    reaches1 = convert_sensors_to_yth_row(y, reaches)
 
-    # 3. get minimum & maximum x on y-th row
-    minmax = get_minmax(sb_pairs)
+    # 3. convert to intervals
+    intervals = convert_reaches_to_intervals(y, reaches1)
 
-    # 4. convert to intervals
-    intervals = convert_reaches_to_intervals(reaches)
-
-    # 5. merge intervals
+    # 4. merge intervals
     x_intervals = merge_yth_row_intervals(y, intervals)
 
-    # 6. check already existing sensors & beacons on y-th row
+    # 5. check already existing sensors & beacons on y-th row
     yth_row_sensor_xs = get_yth_row_sensors_xs(y, sb_pairs)
     yth_row_beacon_xs = get_yth_row_beacons_xs(y, sb_pairs)
 
-    # 7. count covered cells by intervals
-    result1 = count_occupied_cells(x_intervals, yth_row_sensor_xs, yth_row_beacon_xs)
+    # 6. count covered cells by intervals
+    return count_occupied_cells(x_intervals, yth_row_sensor_xs, yth_row_beacon_xs)
+
+
+def part2(sb_pairs: List[SbPair]):
+    # NB! It will run for some time (approx 30s)
+    reaches = calculate_reaches(sb_pairs)
+
+    for y in range(4_000_000):
+        reaches1 = convert_sensors_to_yth_row(y, reaches)
+        intervals = convert_reaches_to_intervals(y, reaches1)
+        x_intervals = merge_yth_row_intervals(y, intervals)
+        if len(x_intervals) == 2:
+            print(f'Found: {y}. Interval: {x_intervals}')
+            assert x_intervals[0][1] + 1 == x_intervals[1][0] - 1
+            found_x = x_intervals[0][1] + 1
+            found_y = y
+            return found_x * 4_000_000 + found_y
+
+
+if __name__ == '__main__':
+    # filename, y = ('sample.txt', 10)
+    filename, y = ('input.txt', 2_000_000)
+
+    with open(filename) as f:
+        lines = [line.strip() for line in f]
+
+    sb_pairs = parse(lines)
+    result1 = part1(sb_pairs, y)
     print(f'Result 1: {result1}')
 
+    print('====')
 
+    result2 = part2(sb_pairs)
+    print(f'Result 2: {result2}')  # 12567351400528
