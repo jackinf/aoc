@@ -57,7 +57,7 @@ def construct_full_map(paths, rates):
             if cand in seen:
                 continue
             seen.add(cand)
-            if rates[key] > 0 and rates[cand] > 0 and key != cand:
+            if (rates[key] > 0 or key == 'AA') and rates[cand] > 0 and key != cand:
                 full_map[key].add((cand, depth))
 
             for new_cand in paths[cand]:
@@ -78,18 +78,15 @@ class Step:
     log: str
 
 
-def traverse(full_map: Dict[str, Set[Tuple[str, int]]], paths, rates):
+def traverse(full_map: Dict[str, Set[Tuple[str, int]]], rates):
     q: List[Step] = []
-    for start_pos in paths['AA']:
-        if rates[start_pos] == 0:
-            continue
-
+    for start_pos, moves in full_map['AA']:
         step = Step(
             prev_pos='AA',
             curr_pos=start_pos,
             curr_score=0,
             prev_minute=0,
-            curr_minute=1,
+            curr_minute=moves,
             curr_open_valves=set(),
             log=''
         )
@@ -97,6 +94,7 @@ def traverse(full_map: Dict[str, Set[Tuple[str, int]]], paths, rates):
 
     best_score = 0
     best_log = ''
+    del full_map['AA']
     all_valves_len = len(full_map)
 
     # We always open a valve when we arrive at position. The movement is not done in 1 step, rather in multiple steps
@@ -110,6 +108,8 @@ def traverse(full_map: Dict[str, Set[Tuple[str, int]]], paths, rates):
         curr_minute = step.curr_minute
         curr_open_valves = step.curr_open_valves
         log = step.log
+
+        # print(prev_minute, curr_minute, curr_pos, len(curr_open_valves))
 
         # if made it to the last minute - finish the item
         if curr_minute > 30:
@@ -162,7 +162,7 @@ def traverse(full_map: Dict[str, Set[Tuple[str, int]]], paths, rates):
                 curr_pos=new_cand,
                 curr_score=curr_score,
                 prev_minute=curr_minute,
-                curr_minute=curr_minute + minutes_delta,
+                curr_minute=min(curr_minute + minutes_delta, 31),
                 curr_open_valves=set(curr_open_valves),
                 log=log
             )
@@ -173,7 +173,7 @@ def traverse(full_map: Dict[str, Set[Tuple[str, int]]], paths, rates):
 
 
 if __name__ == '__main__':
-    with open('sample.txt') as f:
+    with open('input.txt') as f:
         lines = [line.strip() for line in f]
     # print(lines)
 
@@ -184,5 +184,5 @@ if __name__ == '__main__':
     full_map = construct_full_map(paths, rates)
     # pprint(full_map)
 
-    best_score = traverse(full_map, paths, rates)
+    best_score = traverse(full_map, rates)
     print(f'Result 1: {best_score}')
