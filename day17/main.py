@@ -179,29 +179,38 @@ class Grid:
 
 
 if __name__ == '__main__':
-    with open('sample.txt') as f:
+    with open('input.txt') as f:
         arrows = f.readline().strip()
         movement_map = {'>': 1, '<': -1}
         movements = [movement_map[arrow] for arrow in arrows]
 
-    # print(movements)
-
     grid = Grid()
     grid.expand_board(10)
 
-    for i, movement in enumerate(movements):
-        # print(i)
-        # input()
+    debug = False
+    i = 0
+    while True:
+        movement = movements[i % len(movements)]
+        i += 1
+
         spawned = grid.try_spawn_rock()
 
-        if spawned:
+        if spawned and debug:
             grid.draw()
             print(f'Height: {grid.get_height()}. Spawned: {grid.rocks_spawned}')
             print()
 
-        # if grid.rocks_spawned == 2023:
+        # Part 1 answer:
+        if grid.rocks_spawned == 2023:
+            grid.draw()
+            print(f'Height: {grid.get_height()}. Spawned: {grid.rocks_spawned}')
+            break
+
+        # # Part 2 answer (this will never reach this number xD):
+        # if grid.rocks_spawned == 1_000_000_000_000:
         #     grid.draw()
         #     print(f'Height: {grid.get_height()}. Spawned: {grid.rocks_spawned}')
+        #     break
 
         grid.update(movement)
         # grid.draw()
