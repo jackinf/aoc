@@ -109,8 +109,6 @@ def traverse(full_map: Dict[str, Set[Tuple[str, int]]], rates):
         curr_open_valves = step.curr_open_valves
         log = step.log
 
-        # print(prev_minute, curr_minute, curr_pos, len(curr_open_valves))
-
         # if made it to the last minute - finish the item
         if curr_minute > 30:
             best_score, best_log = max(best_score, curr_score), log
@@ -130,10 +128,6 @@ def traverse(full_map: Dict[str, Set[Tuple[str, int]]], rates):
             curr_open_valves.add(curr_pos)  # open the valve that we arrived to just now
             curr_minute += 1  # we spend 1 minute opening the valve
             log += f' |=== MINUTE {curr_minute}: opened {curr_pos} valve, {step.curr_score} + {released_pressure_per_minute} x {minutes_spent_moving} = {curr_score}p\n'
-            # log += f' |=== #{curr_minute}: opened {curr_pos} valve. All opened valves: {", ".join(curr_open_valves)}\n'
-
-        # update log
-        # print(curr_pos, curr_score, curr_minute, curr_open_valves, log)
 
         # STAY: if as all valves are open, let's just wait another minute (or calculate the finishing time)
         if all_valves_len == len(curr_open_valves):
@@ -173,16 +167,13 @@ def traverse(full_map: Dict[str, Set[Tuple[str, int]]], rates):
 
 
 if __name__ == '__main__':
-    with open('input.txt') as f:
+    with open('sample.txt') as f:
         lines = [line.strip() for line in f]
-    # print(lines)
 
     paths, rates = parse(lines)
-    # pprint(paths)
-    # pprint(rates)
 
     full_map = construct_full_map(paths, rates)
-    # pprint(full_map)
+    pprint(full_map)
 
     best_score = traverse(full_map, rates)
-    print(f'Result 1: {best_score}')
+    print(f'Result 1: {best_score}')  # guessed 2479

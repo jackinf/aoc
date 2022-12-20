@@ -37,3 +37,8 @@ src/sandbox.py
 __pycache__/
 .pytest_cache/
 .pytest_cache
+
+
+# Added by cargo
+
+/target
