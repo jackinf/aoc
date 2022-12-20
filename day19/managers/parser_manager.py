@@ -17,6 +17,7 @@ class ParserManager:
                   "Each obsidian robot costs (?P<obsidianRobotCost>.+). "
                   "Each geode robot costs (?P<geodeRobotCost>.+).", line)
 
+            id = int(match.group("blueprint"))
             ore_robot_cost_phrases: List[str] = [phrase.strip() for phrase in match.group("oreRobotCost").split('and')]
             clay_robot_cost_phrases: List[str] = [phrase.strip() for phrase in match.group("clayRobotCost").split('and')]
             obsidian_robot_cost_phrases: List[str] = [phrase.strip() for phrase in match.group("obsidianRobotCost").split('and')]
@@ -28,6 +29,7 @@ class ParserManager:
             geode_robot_cost = RobotCost.create_from(geode_robot_cost_phrases)
 
             blueprints.append(Blueprint(
+                id=id,
                 ore_robot_cost=ore_robot_cost,
                 clay_robot_cost=clay_robot_cost,
                 obsidian_robot_cost=obsidian_robot_cost,

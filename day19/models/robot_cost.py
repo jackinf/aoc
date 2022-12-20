@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 from typing import List
 
+from day19.models.minerals import Minerals
+
 
 @dataclass
 class RobotCost:
-    ore: int
-    clay: int
-    obsidian: int
-    geode: int
+    minerals: Minerals
 
     @staticmethod
     def create_from(phrases: List[str]) -> "RobotCost":
@@ -22,4 +21,4 @@ class RobotCost:
             obsidian += count if name == "obsidian" else 0
             geode += count if name == "geode" else 0
 
-        return RobotCost(ore, clay, obsidian, geode)
+        return RobotCost(Minerals(ore, clay, obsidian, geode))
