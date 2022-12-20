@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from typing import List
 
-# from day19.types import PhraseType
-
 
 @dataclass
 class RobotCost:
@@ -25,11 +23,3 @@ class RobotCost:
             geode += count if name == "geode" else 0
 
         return RobotCost(ore, clay, obsidian, geode)
-
-
-@dataclass
-class Blueprint:
-    ore_robot_cost: RobotCost
-    clay_robot_cost: RobotCost
-    obsidian_robot_cost: RobotCost
-    geode_robot_cost: RobotCost
