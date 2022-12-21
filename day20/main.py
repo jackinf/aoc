@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, List
 
 
 @dataclass
@@ -7,6 +7,20 @@ class Node:
     val: int
     prev: Optional["Node"]
     next: Optional["Node"]
+
+
+def construct_doubly_linked_list(numbers: List[int]):
+    head = Node(val=0, prev=None, next=None)
+    queue = []
+    prev = head
+    for number in numbers:
+        node = Node(val=number, prev=prev, next=None)
+        queue.append(node)
+        prev.next = node
+        prev = node
+    prev.next, head.next.prev = head.next, prev
+
+    return head, queue
 
 
 def print_nodes(node: Node, steps: int):
@@ -26,30 +40,8 @@ def swap_nodes(left: Node, right: Node):
     right.next, left.prev = left, right
 
 
-if __name__ == '__main__':
-    with open('input.txt') as f:
-        numbers = [int(line.strip()) for line in f]
-
-    N = len(numbers)
-    # print(numbers)
-    head = Node(val=0, prev=None, next=None)
-
-    queue = []
-
-    # construct doubly linked list
-    prev = head
-    while numbers:
-        number = numbers.pop(0)
-        node = Node(val=number, prev=prev, next=None)
-        queue.append(node)
-        prev.next = node
-        prev = node
-    prev.next, head.next.prev = head.next, prev
-
-    # print_nodes(head.next, N)
-
-    while queue:
-        node = queue.pop(0)
+def shuffle(queue):
+    for node in queue:
         steps = node.val
 
         while steps < 0:
@@ -60,23 +52,39 @@ if __name__ == '__main__':
             steps -= 1
             swap_nodes(node, node.next)
 
-        # print_nodes(head.next, N)
 
+def calculate_result(head: Node):
     # find 0 as starting position
     node = head.next
     while node.val != 0:
         node = node.next
 
     # find 1000th, 2000th and 3000th elements
-    steps, res = 0, 0
+    steps, result = 0, 0
     while steps <= 3000:
         node = node.next
         steps += 1
 
         if steps % 1000 == 0:
-            res += node.val
+            result += node.val
+    return result
 
-    print(f'Result 1: {res}')
+
+if __name__ == '__main__':
+    with open('input.txt') as f:
+        numbers = [int(line.strip()) for line in f]
+
+    head, queue1 = construct_doubly_linked_list(numbers)
+    shuffle(queue1)
+    res1 = calculate_result(head)
+    print(f'Result 1: {res1}')
+
+    head, queue2 = construct_doubly_linked_list(numbers)
+    for _ in range(10):  # I think that this is not right
+        shuffle(queue2)
+    res2 = calculate_result(head) * 811589153
+
+    print(f'Result 2: {res2}')
 
 
 
