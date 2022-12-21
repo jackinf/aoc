@@ -1,0 +1,14 @@
+Blueprint 1:
+  Each ore robot costs 4 ore.
+  Each clay robot costs 2 ore.
+  Each obsidian robot costs 3 ore and 14 clay.
+  Each geode robot costs 2 ore and 7 obsidian.
+
+which means that
+
+geode robot costs 2 ore & 7 obsidian = 2 ore + 7 x (3 ore + 14 x 2 ore) = 219 ore
+
+We reduce blueprint to
+Blueprint 1:
+  Each ore robot costs 4 ore.
+  Each geode robot costs 219 ore.

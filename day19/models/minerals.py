@@ -3,10 +3,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class Minerals:
-    ore: int
-    clay: int
-    obsidian: int
-    geode: int
+    ore: int = 0
+    clay: int = 0
+    obsidian: int = 0
+    geode: int = 0
 
     def __add__(self, other: "Minerals") -> "Minerals":
         return Minerals(
@@ -32,3 +32,10 @@ class Minerals:
 
     def copy(self) -> "Minerals":
         return Minerals(self.ore, self.clay, self.obsidian, self.geode)
+
+    def get_by_type(self, type: str):
+        match type:
+            case "ore": return self.ore
+            case "clay": return self.clay
+            case "obsidian": return self.obsidian
+            case "geode": return self.geode
