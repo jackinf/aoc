@@ -48,7 +48,7 @@ def draw_grid(bkeys, bpos, RC):
 
     print()
     print('# ', end='')
-    print('#' * ROWS, end='')
+    print('#' * COLS, end='')
     print()
 
     for row in range(ROWS):
@@ -67,7 +67,7 @@ def draw_grid(bkeys, bpos, RC):
         print('#', end='')
         print()
 
-    print('#' * ROWS, end='')
+    print('#' * COLS, end='')
     print(' #', end='')
     print()
 
@@ -93,3 +93,13 @@ if __name__ == '__main__':
         move_blizzards(bkeys, bpos, RC)
         draw_grid(bkeys, bpos, RC)
         step += 1
+
+    # q = [(0, 0), 0]
+    # while q:
+    #     (row, col), step = q.pop(0)
+    #
+    #     move_blizzards(bkeys, bpos, RC)
+    #
+    #     # if can wait
+    #     if (row, col) not in bpos:
+    #         q.append((row, col))
