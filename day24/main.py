@@ -1,6 +1,9 @@
+import time
 from collections import defaultdict
 from pprint import pprint
 
+from day24.bfs import bfs
+from day24.draw_grid2 import draw_grid2
 
 # Blizzard symbols
 SYMBOLS = {'>', '<', '^', 'v'}
@@ -37,69 +40,40 @@ def move_blizzards(bkeys, bpos, RC):
         bpos[id] = (row, col)
 
 
-def draw_grid(bkeys, bpos, RC):
-    ROWS, COLS = RC
-    ids = bpos.keys()
-
-    blizzards = defaultdict(list)
-    for id in ids:
-        row, col = bpos[id]
-        blizzards[(row, col)].append(id)
-
-    print()
-    print('# ', end='')
-    print('#' * COLS, end='')
-    print()
-
-    for row in range(ROWS):
-        print('#', end='')
-        for col in range(COLS):
-            ids = blizzards.get((row, col), [])
-
-            if len(ids) == 0:
-                symbol = '.'
-            elif len(ids) == 1:
-                symbol = bkeys[ids[0]]
-            else:
-                symbol = str(len(ids))
-
-            print(symbol, end='')
-        print('#', end='')
-        print()
-
-    print('#' * COLS, end='')
-    print(' #', end='')
-    print()
-
-
 if __name__ == '__main__':
-    with open('sample1.txt') as f:
+    with open('input.txt') as f:
         grid = [list(line.strip()) for line in f]
         # cut walls
         grid = [[col for col in row][1:-1] for row in grid][1:-1]
     RC = len(grid), len(grid[0])
+    ROWS, COLS = RC
     pprint(grid)
 
     bkeys, bpos = collect_blizzards(grid)
     pprint(bkeys)
     pprint(bpos)
 
+    bpos_rev = defaultdict(set)
+    for id, (row, col) in bpos.items():
+        bpos_rev[(row, col)].add(bkeys[id])
+
     move_blizzards(bkeys, bpos, RC)
     pprint(bkeys)
     pprint(bpos)
 
-    step = 0
-    while step < 10:
-        move_blizzards(bkeys, bpos, RC)
-        draw_grid(bkeys, bpos, RC)
-        step += 1
-
-    # q = [(0, 0), 0]
-    # while q:
-    #     (row, col), step = q.pop(0)
-    #
+    # step = 0
+    # while step < 10:
     #     move_blizzards(bkeys, bpos, RC)
-    #
-    #     # if can wait
-    #     if (row, col) not in bpos:
-    #         q.append((row, col))
+    #     draw_grid(bkeys, bpos, RC, special_mode=True)
+    #     step += 1
+
+    print('Demo start.')
+
+    draw_grid2(RC, bpos_rev, 0)
+    draw_grid2(RC, bpos_rev, 1)
+    draw_grid2(RC, bpos_rev, 2)
+    draw_grid2(RC, bpos_rev, 3)
+
+    print('Demo end.')
+
+    bfs(RC, bpos_rev)
