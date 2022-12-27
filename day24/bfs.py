@@ -1,3 +1,6 @@
+import heapq
+
+
 def is_occupied_at(RC, bpos_rev, row, col, step):
     ROWS, COLS = RC
 
@@ -27,35 +30,27 @@ def is_occupied_at(RC, bpos_rev, row, col, step):
 def bfs(RC, bpos_rev):
     ROWS, COLS = RC
 
-    q = [((0, 0), 1)]
+    q = [(0, (0, 0), 1)]
     while q:
-        item = q.pop(0)
-        (row, col), step = item
+        # item = q.pop(0)
+        item = heapq.heappop(q)
+        score, (row, col), step = item
         print(f'\r q: {len(q)}', end='', flush=True)
         if not (0 <= row < ROWS and 0 <= col < COLS):
             continue
 
         # check if finished
         if row == ROWS - 1 and col == COLS - 2:
+            print()
             print(f'best_steps: {step}')
             return step  # assume best step
 
-        can_go_down = not is_occupied_at(RC, bpos_rev, row + 1, col, step + 1)
-        can_go_right = not is_occupied_at(RC, bpos_rev, row, col + 1, step + 1)
-        can_go_up = not is_occupied_at(RC, bpos_rev, row - 1, col, step + 1)
-        can_go_left = not is_occupied_at(RC, bpos_rev, row, col - 1, step + 1)
-        can_stay = not is_occupied_at(RC, bpos_rev, row, col, step + 1)
-
-        if can_go_down:
-            q.append(((row + 1, col), step + 1))
-        if can_go_right:
-            q.append(((row, col + 1), step + 1))
-
-        if can_go_up:
-            q.append(((row - 1, col), step + 1))
-        if can_go_left:
-            q.append(((row, col - 1), step + 1))
-        if can_stay:
-            q.append(((row, col), step + 1))
+        for dr, dc in ((1, 0), (0, 1), (-1, 0), (0, -1), (0, 0)):
+            new_row, new_col = row + dr, col + dc
+            if not is_occupied_at(RC, bpos_rev, new_row, new_col, step + 1):
+                score = -(new_row * 100_000 + new_col)
+                new_item = (score, (new_row, new_col), step + 1)
+                heapq.heappush(q, new_item)
+                # q.append(new_item)
 
     return -1

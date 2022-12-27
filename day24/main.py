@@ -45,27 +45,14 @@ if __name__ == '__main__':
         grid = [list(line.strip()) for line in f]
         # cut walls
         grid = [[col for col in row][1:-1] for row in grid][1:-1]
+
     RC = len(grid), len(grid[0])
     ROWS, COLS = RC
-    pprint(grid)
-
     bkeys, bpos = collect_blizzards(grid)
-    pprint(bkeys)
-    pprint(bpos)
 
     bpos_rev = defaultdict(set)
     for id, (row, col) in bpos.items():
         bpos_rev[(row, col)].add(bkeys[id])
-
-    move_blizzards(bkeys, bpos, RC)
-    pprint(bkeys)
-    pprint(bpos)
-
-    # step = 0
-    # while step < 10:
-    #     move_blizzards(bkeys, bpos, RC)
-    #     draw_grid(bkeys, bpos, RC, special_mode=True)
-    #     step += 1
 
     print('Demo start.')
 
