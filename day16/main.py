@@ -1,6 +1,5 @@
 import re
 from collections import defaultdict
-from dataclasses import dataclass
 from pprint import pprint
 from typing import List, Dict, Set, Tuple
 
@@ -28,152 +27,92 @@ def parse(lines: List[str]) -> Tuple[ValvePaths, ValveRates]:
 
         for valve in valves:
             paths[main_valve].add(valve)
-            paths[valve].add(main_valve)
             rates[main_valve] = rate
 
     return paths, rates
 
 
-def get_unique_valves(paths: ValvePaths) -> Valves:
-    return set(paths.keys())
-
-
-def calculate_score(valves: Valves, rates: ValveRates) -> Score:
+def calculate_score(valves: Set[str], rates: Dict[str, int]) -> Score:
     return sum(rates[valve] for valve in valves)
 
-def make_full_map_key(p1: str, p2: str):
-    return '-'.join(sorted([p1, p2]))
 
+def traverse(paths, rates):
+    # q = [('AA', 30, 0, set(), '')]
+    q = []
+    for nei in paths['AA']:
+        q.append((nei, 29, 0, set(), ''))
 
-def construct_full_map(paths, rates):
-    full_map = defaultdict(set)
-
-    for key in sorted(paths.keys()):
-        seen = set()
-        q = [(key, 0)]
-        while q:
-            cand, depth = q.pop(0)
-
-            if cand in seen:
-                continue
-            seen.add(cand)
-            if (rates[key] > 0 or key == 'AA') and rates[cand] > 0 and key != cand:
-                full_map[key].add((cand, depth))
-
-            for new_cand in paths[cand]:
-                q.append((new_cand, depth + 1))
-
-    # return full_map
-    return {k:v for k,v in full_map.items()}
-
-
-@dataclass
-class Step:
-    prev_pos: str
-    curr_pos: str
-    curr_score: int
-    prev_minute: int
-    curr_minute: int
-    curr_open_valves: set
-    log: str
-
-
-def traverse(full_map: Dict[str, Set[Tuple[str, int]]], rates):
-    q: List[Step] = []
-    for start_pos, moves in full_map['AA']:
-        step = Step(
-            prev_pos='AA',
-            curr_pos=start_pos,
-            curr_score=0,
-            prev_minute=0,
-            curr_minute=moves,
-            curr_open_valves=set(),
-            log=''
-        )
-        q.append(step)
-
+    bests = defaultdict(lambda: -1)
     best_score = 0
     best_log = ''
-    del full_map['AA']
-    all_valves_len = len(full_map)
+    smallest_min_remaining = 30
+    total_valves_to_open = len([node for node in paths.keys() if rates[node] > 0])
 
-    # We always open a valve when we arrive at position. The movement is not done in 1 step, rather in multiple steps
     while q:
-        # extract step values
-        step = q.pop(0)
-        prev_pos = step.prev_pos
-        curr_pos = step.curr_pos
-        curr_score = step.curr_score
-        prev_minute = step.prev_minute
-        curr_minute = step.curr_minute
-        curr_open_valves = step.curr_open_valves
-        log = step.log
+        print(f'\r q={len(q)}, best_score={best_score}, longest_minute={smallest_min_remaining}', end='', flush=True)
 
-        # if made it to the last minute - finish the item
-        if curr_minute > 30:
-            best_score, best_log = max(best_score, curr_score), log
+        curr, minutes_remaining, flow_total, valves, log = q.pop(0)
+        log += f'\n== Minute {30 - minutes_remaining + 1} ==\n'
+
+        flow_rate = calculate_score(valves, rates)  # calculate score
+        if valves:
+            log += f"Valves {', '.join(valves)} are open, releasing {flow_rate} pressure.\n"
+        else:
+            log += "No valves are open.\n"
+
+        # ending
+        if minutes_remaining == 1:
+            if best_score == flow_total:
+                best_score = flow_total
+                best_log = log
             continue
 
-        # calculate current score based on opened valves
-        minutes_spent_moving = curr_minute - prev_minute
-        released_pressure_per_minute = calculate_score(curr_open_valves, rates)
-        total_released_pressure = released_pressure_per_minute * minutes_spent_moving
-        curr_score += total_released_pressure
-        log += f' |=== MINUTE {curr_minute}: {prev_pos} -> {curr_pos} (made {minutes_spent_moving} steps), {step.curr_score} + {released_pressure_per_minute} x {minutes_spent_moving} = {curr_score}p\n'
+        # optimization
+        if bests[curr] > flow_total:
+            continue
+        bests[curr] = flow_total
 
-        if curr_pos not in curr_open_valves:
-            released_pressure_per_minute = calculate_score(curr_open_valves, rates)
-            curr_score += released_pressure_per_minute
+        flow_total += flow_rate
+        best_score = max(best_score, flow_total)
+        smallest_min_remaining = min(smallest_min_remaining, minutes_remaining)
 
-            curr_open_valves.add(curr_pos)  # open the valve that we arrived to just now
-            curr_minute += 1  # we spend 1 minute opening the valve
-            log += f' |=== MINUTE {curr_minute}: opened {curr_pos} valve, {step.curr_score} + {released_pressure_per_minute} x {minutes_spent_moving} = {curr_score}p\n'
-
-        # STAY: if as all valves are open, let's just wait another minute (or calculate the finishing time)
-        if all_valves_len == len(curr_open_valves):
-            step = Step(
-                prev_pos=curr_pos,
-                curr_pos=curr_pos,
-                curr_score=curr_score,
-                prev_minute=curr_minute,
-                curr_minute=curr_minute + 1,
-                curr_open_valves=set(curr_open_valves),
-                log=log
-            )
-            q.append(step)
+        # we opened all the valves that can produce score; sit & wait
+        if total_valves_to_open == len(valves):
+            q.append((curr, minutes_remaining - 1, flow_total, valves.copy(), log))
             continue
 
-        if curr_pos not in full_map:
-            continue
+        # go to a neighbour
+        for nei in paths[curr]:
+            q.append((nei, minutes_remaining - 1, flow_total, valves.copy(), log + f"You move to valve {nei}.\n"))
 
-        # MOVE: continue traversing other non-opened valves
-        for new_cand, minutes_delta in full_map[curr_pos]:
-            if new_cand in curr_open_valves:
-                continue  # this one is open, skip
+        # try to open a valve that has score >0
+        if rates[curr] > 0 and curr not in valves:
+            flow_total += rates[curr]
+            valves.add(curr)
 
-            step = Step(
-                prev_pos=curr_pos,
-                curr_pos=new_cand,
-                curr_score=curr_score,
-                prev_minute=curr_minute,
-                curr_minute=min(curr_minute + minutes_delta, 31),
-                curr_open_valves=set(curr_open_valves),
-                log=log
-            )
-            q.append(step)
+            q.append((curr, minutes_remaining - 1, flow_total, valves.copy(), log + f'You open valve {curr}.\n'))
 
+    print()
+    print('best_log')
     print(best_log)
     return best_score
 
 
+def find_part1(paths, rates):
+    best = 0
+    for i in range(10):
+        best = max(best, traverse(paths, rates))  # result can be either 2320 or 2293... try running a couple of times
+    return best
+
+
 if __name__ == '__main__':
-    with open('sample.txt') as f:
+    with open('input.txt') as f:
         lines = [line.strip() for line in f]
+    print(lines)
 
     paths, rates = parse(lines)
+    pprint(paths)
+    print(rates)
 
-    full_map = construct_full_map(paths, rates)
-    pprint(full_map)
-
-    best_score = traverse(full_map, rates)
-    print(f'Result 1: {best_score}')  # guessed 2479
+    best_score = find_part1(paths, rates)
+    print(f'Result 1: {best_score}')  # 2320
