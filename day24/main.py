@@ -41,7 +41,7 @@ def move_blizzards(bkeys, bpos, RC):
 
 
 if __name__ == '__main__':
-    with open('input.txt') as f:
+    with open('sample3.txt') as f:
         grid = [list(line.strip()) for line in f]
         # cut walls
         grid = [[col for col in row][1:-1] for row in grid][1:-1]
@@ -63,4 +63,4 @@ if __name__ == '__main__':
 
     print('Demo end.')
 
-    bfs(RC, bpos_rev)
+    # bfs(RC, bpos_rev)
