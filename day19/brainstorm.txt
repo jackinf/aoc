@@ -12,3 +12,6 @@ We reduce blueprint to
 Blueprint 1:
   Each ore robot costs 4 ore.
   Each geode robot costs 219 ore.
+
+======
+

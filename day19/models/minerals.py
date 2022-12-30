@@ -30,6 +30,12 @@ class Minerals:
             and self.obsidian >= other.obsidian \
             and self.geode >= other.geode
 
+    def negate(self):
+        self.ore *= -1
+        self.clay *= -1
+        self.obsidian *= -1
+        self.geode *= -1
+
     def copy(self) -> "Minerals":
         return Minerals(self.ore, self.clay, self.obsidian, self.geode)
 
