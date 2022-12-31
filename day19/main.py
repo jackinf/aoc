@@ -8,7 +8,7 @@ if __name__ == '__main__':
     blueprints = ParserManager.parse(lines)
 
     total_quality = 0
-    for blueprint in blueprints:
+    for blueprint in blueprints[:2]:
         simulation = Simulation()
         quality = simulation.simulate(blueprint)
         print(f'Blueprint {blueprint.id} quality is: {quality}')

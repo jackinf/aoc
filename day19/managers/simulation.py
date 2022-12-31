@@ -27,6 +27,7 @@ class Simulation:
 
         exchange = CurrencyManager.generate_currency_exchange(blueprint)
         best_scores = defaultdict(int)
+        best_ores = defaultdict(int)
 
         while q:
             step: Tuple[Wallet, Inventory, int, str] = q.pop(0)
@@ -48,9 +49,11 @@ class Simulation:
 
             # TODO: Define Heuristic
             score_curr = CurrencyManager.get_score3(wallet, inventory, max_minutes - minute)
-            if best_scores[minute] > score_curr:
+            tot = wallet.total_in_ores(exchange)
+            if best_scores[minute] > score_curr and best_ores[minute] > tot:
                 continue
             best_scores[minute] = score_curr
+            best_ores[minute] = tot
 
             # Try to buy a robot
             for robot_type in ["geode", "obsidian", "clay", "ore"]:
