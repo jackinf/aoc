@@ -1,66 +1,52 @@
-import time
-from collections import defaultdict
-from pprint import pprint
-
-from day24.bfs import bfs
-from day24.draw_grid2 import draw_grid2
-
-# Blizzard symbols
-SYMBOLS = {'>', '<', '^', 'v'}
-
-
-def collect_blizzards(grid):
-    ROWS, COLS = len(grid), len(grid[0])
-    blizzard_key = {}
-    blizzard_pos = {}
-
-    next_id = 1
-    for row in range(ROWS):
-        for col in range(COLS):
-            if grid[row][col] in SYMBOLS:
-                blizzard_key[next_id] = grid[row][col]
-                blizzard_pos[next_id] = (row, col)
-                next_id += 1
-
-    return blizzard_key, blizzard_pos
-
-def move_blizzards(bkeys, bpos, RC):
+def bfs(RC, grid, start, stop, step):
     ROWS, COLS = RC
 
-    for id in bpos.keys():
-        key = bkeys[id]
-        row, col = bpos[id]
+    q = {start}
 
-        row += 1 if key == 'v' else -1 if key == '^' else 0
-        col += 1 if key == '>' else -1 if key == '<' else 0
+    while True:
+        next_q = set()
 
-        row %= ROWS
-        col %= COLS
+        for row, col in q:
+            for new_row, new_col in ((row, col + 1), (row + 1, col), (row, col), (row - 1, col), (row, col - 1)):
 
-        bpos[id] = (row, col)
+                # check if finished
+                if (new_row, new_col) == stop:
+                    return step
+
+                # check if out of bounds
+                if not (0 <= new_row < ROWS and 0 <= new_col < COLS):
+                    continue
+
+                # check if intersects with blizzard at certain step
+                if grid[new_row][(new_col - step) % COLS] == ">" \
+                        or grid[new_row][(new_col + step) % COLS] == "<" \
+                        or grid[(new_row - step) % ROWS][new_col] == "v" \
+                        or grid[(new_row + step) % ROWS][new_col] == "^":
+                    continue
+
+                next_q.add((new_row, new_col))
+
+        q = next_q
+        if not q:
+            q.add(start)
+        step += 1
 
 
 if __name__ == '__main__':
-    with open('sample3.txt') as f:
+    with open('input.txt') as f:
         grid = [list(line.strip()) for line in f]
         # cut walls
         grid = [[col for col in row][1:-1] for row in grid][1:-1]
 
     RC = len(grid), len(grid[0])
     ROWS, COLS = RC
-    bkeys, bpos = collect_blizzards(grid)
 
-    bpos_rev = defaultdict(set)
-    for id, (row, col) in bpos.items():
-        bpos_rev[(row, col)].add(bkeys[id])
+    start = (-1, 0)
+    stop = (ROWS, COLS - 1)
 
-    print('Demo start.')
+    step1 = bfs(RC, grid, start, stop, 1)
+    print(f'Result 1: {step1}')
 
-    draw_grid2(RC, bpos_rev, 0)
-    draw_grid2(RC, bpos_rev, 1)
-    draw_grid2(RC, bpos_rev, 2)
-    draw_grid2(RC, bpos_rev, 3)
-
-    print('Demo end.')
-
-    # bfs(RC, bpos_rev)
+    step2 = bfs(RC, grid, stop, start, step1)
+    step3 = bfs(RC, grid, start, stop, step2)
+    print(f'Result 2: {step3}')
