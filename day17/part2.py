@@ -102,6 +102,9 @@ class Grid:
             self.falling_rock.move_vertically(1)  # undo
             self.__place_a_falling_rock()
 
+    def get_cached(self):
+        return ''.join([x for y in self.board[-8:] for x in y])
+
     def draw(self):
         self.__clear_board()
 
@@ -122,6 +125,29 @@ class Grid:
         print('+-------+')
 
         self.__clear_board()
+
+    def get_first_n_rows(self, n):
+        if len(self.board) < n:
+            return ''
+        self.__clear_board()
+
+        output = ""
+
+        # draw a falling rock shape
+        if self.falling_rock:
+            rock = self.falling_rock
+            for row in range(rock.height):
+                for col in range(rock.width):
+                    self.board[rock.row - row][rock.col + col] = rock.shape[row][col]
+
+        # output everything
+        for row in range(len(self.board) - 1, len(self.board) - n, -1):
+            output += "|"
+            for col in range(len(self.board[0])):
+                output += self.board[row][col]
+
+        self.__clear_board()
+        return output
 
     def get_height(self):
         for row in range(len(self.board) - 1, -1, -1):
@@ -187,30 +213,84 @@ if __name__ == '__main__':
     grid = Grid()
     grid.expand_board(10)
 
-    debug = False
-    i = 0
+    global_i = 0
+    cache = {}
+    target = 1_000_000_000_000
+
+    """
+    I am trying to check if the state has been repeated somehow...
+    
+    I found that each 5000 steps falls exactly 835 rocks
+    That means when we reach 1_000_000_000_000, then 835 rocks will fall 1_000_000_000_000 / 5000 = 2_000_000_000 times
+    therefore, a total amount of rocks that will fall will be 2_000_000_000 x 835 =...
+    
+    Ok, that seems to be the wrong assumption...    
+    """
+
+    skip_height = 0
+    skip_rocks = 0
+
     while True:
-        movement = movements[i % len(movements)]
-        i += 1
+        local_i = global_i % len(movements)
+        movement = movements[local_i]
+        height_now = grid.get_height()
 
-        spawned = grid.try_spawn_rock()
+        print(f'\r'
+              f'global index now={global_i}, '
+              f'local index before & now={local_i}, '
+              f'rocks spawned now={skip_rocks + grid.rocks_spawned}, '
+              f'tower height now={skip_height + height_now}, '
+              , end='', flush=True)
 
-        if spawned and debug:
-            grid.draw()
-            print(f'Height: {grid.get_height()}. Spawned: {grid.rocks_spawned}')
-            print()
-
-        # Part 1 answer:
-        if grid.rocks_spawned == 2023:
-            grid.draw()
-            print(f'Height: {grid.get_height()}. Spawned: {grid.rocks_spawned}')
+        if skip_rocks + grid.rocks_spawned == target:
+            print(f'\nResult 2: {skip_height + height_now}')  # guessed 1535483870964 (too high), 1535483870918 (too low)
+            break
+        elif skip_rocks + grid.rocks_spawned > target:
+            print('fail')
             break
 
-        # # Part 2 answer (this will never reach this number xD):
-        # if grid.rocks_spawned == 1_000_000_000_000:
-        #     grid.draw()
-        #     print(f'Height: {grid.get_height()}. Spawned: {grid.rocks_spawned}')
-        #     break
+        is_rock_spawned = grid.try_spawn_rock()
+
+        if is_rock_spawned and skip_height == 0:
+            n_rows_output = grid.get_first_n_rows(100)  # check top 100 rows (if there are not enough rows, then '')
+            if n_rows_output:
+                key = (n_rows_output, local_i)
+
+                # check if the state is the same state has been seen before, the set of movements is going to be the same, and
+                if key in cache:
+                    global_i_before, rocks_spawned_before, height_before = cache[key]
+                    global_i_delta = global_i - global_i_before
+                    rocks_spawned_delta = grid.rocks_spawned - rocks_spawned_before
+                    height_delta = height_now - height_before
+                    print(f'\nFound the same state: '
+                          f'global index before={global_i_before}, '
+                          f'global index now={global_i}, '
+                          f'global index delta={global_i_delta}, '
+                          f'local index before & now={local_i}, '
+                          f'rocks spawned before={rocks_spawned_before}, '
+                          f'rocks spawned now={grid.rocks_spawned}, '
+                          f'rocks spawned delta={rocks_spawned_delta}',
+                          f'tower height before={height_before}, '
+                          f'tower height now={height_now}, '
+                          f'tower height delta={height_delta}',
+                          )
+
+                    # magic... not sure what to do here...
+                    steps_to_skip = (target // rocks_spawned_delta) - len(movements)
+                    global_i *= steps_to_skip
+                    skip_height = steps_to_skip * height_delta
+                    skip_rocks = steps_to_skip * rocks_spawned_delta
+
+                cache[key] = (global_i, grid.rocks_spawned, height_now)
 
         grid.update(movement)
-        # grid.draw()
+        global_i += 1
+
+    # global_i_delta (200)
+    # rock spawn delta (35)
+    # tower height delta (53)
+    # at global_i 609, rocks 109, height is 170
+    # at global_i 809, rocks 144, height is 223
+    # ...
+    # at rocks 1 million-million the height is ?
+
