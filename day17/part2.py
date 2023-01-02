@@ -68,6 +68,7 @@ class Grid:
     board: List[List[str]] = []
     curr_spawn_rock_coord = (3, 2)
     falling_rock: Optional[FallingRock] = None
+    # falling_rock_index: int = 0
     rocks_spawned: int = 0
 
     def __init__(self):
@@ -84,9 +85,11 @@ class Grid:
 
         row, col = self.curr_spawn_rock_coord
         shape = all_spawn_rock_shapes.pop(0)
-        self.falling_rock = FallingRock(row=row, col=col, shape=shape)
+        # shape = all_spawn_rock_shapes[self.falling_rock_index % 5]
 
+        # self.falling_rock_index += 1
         all_spawn_rock_shapes.append(shape)
+        self.falling_rock = FallingRock(row=row, col=col, shape=shape)
         self.rocks_spawned += 1
         return True
 
@@ -224,11 +227,15 @@ if __name__ == '__main__':
     That means when we reach 1_000_000_000_000, then 835 rocks will fall 1_000_000_000_000 / 5000 = 2_000_000_000 times
     therefore, a total amount of rocks that will fall will be 2_000_000_000 x 835 =...
     
-    Ok, that seems to be the wrong assumption...    
+    Ok, that seems to be the wrong assumption...  
+    
+    I still have no idea what's wrong...  
     """
 
     skip_height = 0
     skip_rocks = 0
+    rocks_spawned_now = 0
+    is_rock_spawned = False
 
     while True:
         local_i = global_i % len(movements)
@@ -238,29 +245,27 @@ if __name__ == '__main__':
         print(f'\r'
               f'global index now={global_i}, '
               f'local index before & now={local_i}, '
-              f'rocks spawned now={skip_rocks + grid.rocks_spawned}, '
+              f'rocks spawned now={skip_rocks + rocks_spawned_now}, '
               f'tower height now={skip_height + height_now}, '
               , end='', flush=True)
 
-        if skip_rocks + grid.rocks_spawned == target:
-            print(f'\nResult 2: {skip_height + height_now}')  # guessed 1535483870964 (too high), 1535483870918 (too low)
+        if skip_rocks + rocks_spawned_now == target:
+            print(f'\nResult 2: {skip_height + height_now}')  # guessed 1535483870964 (too high), 1535483870918 (too low)... i'm still wrong answer, which is 1535483870924
             break
-        elif skip_rocks + grid.rocks_spawned > target:
+        elif skip_rocks + rocks_spawned_now > target:
             print('fail')
             break
 
-        is_rock_spawned = grid.try_spawn_rock()
-
-        if is_rock_spawned and skip_height == 0:
-            n_rows_output = grid.get_first_n_rows(100)  # check top 100 rows (if there are not enough rows, then '')
+        if is_rock_spawned:
+            n_rows_output = grid.get_first_n_rows(20)  # check top 100 rows (if there are not enough rows, then '')
             if n_rows_output:
-                key = (n_rows_output, local_i)
+                key = (local_i, n_rows_output)
 
                 # check if the state is the same state has been seen before, the set of movements is going to be the same, and
                 if key in cache:
                     global_i_before, rocks_spawned_before, height_before = cache[key]
                     global_i_delta = global_i - global_i_before
-                    rocks_spawned_delta = grid.rocks_spawned - rocks_spawned_before
+                    rocks_spawned_delta = rocks_spawned_now - rocks_spawned_before
                     height_delta = height_now - height_before
                     print(f'\nFound the same state: '
                           f'global index before={global_i_before}, '
@@ -268,20 +273,23 @@ if __name__ == '__main__':
                           f'global index delta={global_i_delta}, '
                           f'local index before & now={local_i}, '
                           f'rocks spawned before={rocks_spawned_before}, '
-                          f'rocks spawned now={grid.rocks_spawned}, '
+                          f'rocks spawned now={rocks_spawned_now}, '
                           f'rocks spawned delta={rocks_spawned_delta}',
                           f'tower height before={height_before}, '
                           f'tower height now={height_now}, '
                           f'tower height delta={height_delta}',
                           )
 
-                    # magic... not sure what to do here...
-                    steps_to_skip = (target // rocks_spawned_delta) - len(movements)
-                    global_i *= steps_to_skip
-                    skip_height = steps_to_skip * height_delta
-                    skip_rocks = steps_to_skip * rocks_spawned_delta
+                    remaining_rocks = target - rocks_spawned_now
+                    steps_to_skip = remaining_rocks // rocks_spawned_delta  # should be correct
+                    skip_height = steps_to_skip * height_delta  # should be correct
+                    skip_rocks = steps_to_skip * rocks_spawned_delta  # should be correct
+                    cache = {}
 
-                cache[key] = (global_i, grid.rocks_spawned, height_now)
+                cache[key] = (global_i, rocks_spawned_now, height_now)
+
+        is_rock_spawned = grid.try_spawn_rock()
+        rocks_spawned_now = grid.rocks_spawned
 
         grid.update(movement)
         global_i += 1
