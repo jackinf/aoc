@@ -6,16 +6,19 @@ def solve_bfs(grid):
     WIDTH, HEIGHT = len(grid[0]), len(grid)
 
     # score, risk, row, col, seen, depth
-    q = [(0, 0, 0, 0, set(), 0)]
+    q = [(0, 0, 0, 0, 0)]
     best_risk = sys.maxsize
+
+    seen = {}
+
     while q:
-        score, risk, row, col, seen, depth = heapq.heappop(q)
-        print(f'\rq={len(q)}, best_risk={best_risk}', end='', flush=True)
+        score, risk, row, col, depth = heapq.heappop(q)
+        print(f'\rq={len(q)}, score={score}, risk={risk}, best_risk={best_risk}', end='', flush=True)
 
         key = (row, col)
-        if key in seen:
+        if key in seen and seen[key][0] <= risk:
             continue
-        seen.add(key)
+        seen[key] = (risk, depth)
 
         if risk > best_risk:
             continue
@@ -29,23 +32,20 @@ def solve_bfs(grid):
             if not (0 <= nr < len(grid) and 0 <= nc < len(grid[0])):
                 continue
 
-            if (nr, nc) in seen:
-                continue
-
             new_risk = risk + grid[row][col]
-            new_score = depth + (WIDTH - nc) + (HEIGHT - nr)
+            new_score = (WIDTH - 1 - nc) * (HEIGHT - 1 - nr)
 
-            heapq.heappush(q, (new_score, new_risk, nr, nc, seen.copy(), depth + 1))
+            heapq.heappush(q, (0, new_risk, nr, nc, depth + 1))
 
     print()
     return best_risk
 
 
 if __name__ == '__main__':
-    with open('sample.txt') as f:
+    with open('sample3.txt') as f:
         grid = [[int(x) for x in list(line.strip())] for line in f]
 
     res = solve_bfs(grid)
-    print(f'Result 1: {res}')
+    print(f'Result 1: {res}')  # 1045 - too high, 653 - too low, 670 - too high
 
 
