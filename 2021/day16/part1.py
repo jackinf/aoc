@@ -1,8 +1,48 @@
+def solve(bin_val, pointer: int):
+    version_bin = bin_val[pointer:pointer + 3]
+    version = int(version_bin, 2)
+    pointer += 3  # version skip
+
+    is_literal_bin = bin_val[pointer:pointer + 3]
+    is_literal = int(is_literal_bin, 2) == 4
+    pointer += 3  # type skip
+
+    if is_literal:
+        while True:
+            pointer += 5
+            if bin_val[pointer - 5] == '0':
+                break
+        return pointer, version
+
+    len_type_id = bin_val[pointer]
+    pointer += 1
+
+    if len_type_id == '0':
+        diff = int(bin_val[pointer:pointer + 15], 2)
+        pointer += 15
+        end_pointer = pointer + diff
+        while end_pointer != pointer:
+            pointer, sub_version = solve(bin_val, pointer)
+            version += sub_version
+    else:
+        val = int(bin_val[pointer:pointer + 11], 2)
+        pointer += 11
+        for _ in range(val):
+            pointer, sub_version = solve(bin_val, pointer)
+            version += sub_version
+
+    return pointer, version
+
+
 if __name__ == '__main__':
     with open('input.txt') as f:
         hex = f.readline().strip()
 
-    # hex = 'A0016C880162017C3686B18A3D4780'
+    """
+    hex = 620080001611562C8802118E34
+    bin = 01100010000000001000000000000000000101100001000101010110001011001000100000000010000100011000111000110100
+          VVVTTTILLLLLLLLLLL
+    """
 
     hex_to_bin = {
         '0': '0000',
@@ -27,30 +67,5 @@ if __name__ == '__main__':
     for hex_num in hex:
         bin_val += hex_to_bin[hex_num]
 
-    version_result = 0
-    curr = 0
-    while curr <= len(bin_val):
-        try:
-            version_bin = bin_val[curr:curr + 3]
-            version = int(version_bin, 2)
-            curr += 3  # version skip
-
-            is_literal_bin = bin_val[curr:curr + 3]
-            is_literal = int(is_literal_bin, 2) == 4
-            curr += 3  # type skip
-
-            if is_literal:
-                while True:
-                    curr += 5
-                    if bin_val[curr - 5] == '0':
-                        break
-            else:
-                len_sector = 15 if bin_val[curr] == '0' else 11
-                curr += 1  # length type id skip
-                curr += len_sector
-
-            version_result += version
-        except:
-            break
-
-    print(f'Result 1: {version_result}')
+    pointer, version = solve(bin_val, 0)
+    print(f'Result 1: {version}')
