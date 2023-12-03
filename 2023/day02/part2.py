@@ -25,3 +25,4 @@ for game_arr in games_arr:
     game_powers[game_id] = game.get('blue', 1) * game.get('green', 1) * game.get('red', 1)
 
 game_powers_total = sum(game_powers.values())
+print(f'Part 2: {game_powers_total}')

@@ -28,5 +28,4 @@ for game_arr in games_arr:
 
 valid_games_total = sum(valid_games)
 
-print(valid_games)
-print(valid_games_total)
+print(f'Part 1: {valid_games_total}')
