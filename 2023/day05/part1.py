@@ -32,7 +32,7 @@ for seed in seeds:
                     dest_range            [#######]
                     dest_range + diff     [#######][=====]
             """
-            if source_range_start <= curr_value <= source_range_start + length:
+            if source_range_start <= curr_value < source_range_start + length:
                 diff = curr_value - source_range_start
                 curr_value = dest_range_start + diff
                 break  # assuming there's only 1 mapping, thus break the for-loop
