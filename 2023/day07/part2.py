@@ -18,15 +18,6 @@ def card_to_num(val: str):
         case 'A': return 14
         case _: return int(val)
 
-
-"""
-JJJJJ
-#JJJJ
-##JJJ
-###JJ
-####J
-#####
-"""
 def get_kind(hand: str):
     counter = Counter(hand)
     if hand == 'JJJJJ':
