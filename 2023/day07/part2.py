@@ -9,35 +9,45 @@ ONE_PAIR = 1
 HIGH_CARD = 0
 
 
-def card_to_num(val):
+def card_to_num(val: str):
     match val:
         case 'T': return 10
-        case 'J': return 11
+        case 'J': return 1
         case 'Q': return 12
         case 'K': return 13
         case 'A': return 14
         case _: return int(val)
 
 
-def get_kind(hand):
-    counts = sorted(list(Counter(hand).values()), reverse=True)
+"""
+JJJJJ
+#JJJJ
+##JJJ
+###JJ
+####J
+#####
+"""
+def get_kind(hand: str):
+    counter = Counter(hand)
+    if hand == 'JJJJJ':
+        return FIVE_OF_A_KIND
+
+    most_common_card = Counter(hand.replace('J', '')).most_common()[0][0]
+    counter[most_common_card] += counter['J']
+    del counter['J']
+
+    counts = sorted(list(counter.values()), reverse=True)
     if counts[0] == 5:
-        assert len(counts) == 1
         return FIVE_OF_A_KIND
     if counts[0] == 4 and counts[1] == 1:
-        assert len(counts) == 2
         return FOUR_OF_A_KIND
     if counts[0] == 3 and counts[1] == 2:
-        assert len(counts) == 2
         return FULL_HOUSE
     if counts[0] == 3 and counts[1] == 1 and counts[2] == 1:
-        assert len(counts) == 3
         return THREE_OF_A_KIND
     if counts[0] == 2 and counts[1] == 2 and counts[2] == 1:
-        assert len(counts) == 3
         return TWO_PAIR
     if counts[0] == 2 and counts[1] == counts[2] == counts[3] == 1:
-        assert len(counts) == 4
         return ONE_PAIR
     return HIGH_CARD
 
@@ -51,4 +61,5 @@ lines.sort(key=lambda x: (x[2], x[0]))
 scores = [x[1] * (i + 1) for i, x in enumerate(lines)]
 total_score = sum(scores)
 
-print(f'Part 1: {total_score}')
+print(f'Part 2: {total_score}')
+
