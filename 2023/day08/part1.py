@@ -9,15 +9,12 @@ for line in text_groups[1].split('\n'):
     left, right = val.replace('(', '').replace(')', '').split(',')
     navmap[key.strip()] = (left.strip(), right.strip())
 
-print(dirs)
-print(navmap)
-
 dir_i, steps, curr = 0, 0, 'AAA'
 while curr != 'ZZZ':
+    steps += 1
     dir = dirs[dir_i]
     dir_i += 1
     dir_i %= len(dirs)
     curr = navmap[curr][dir]
-    steps += 1
 
 print(f'Part 1: {steps}')
