@@ -34,6 +34,5 @@ for ghost in ghosts:
             break
 
 loop_cache = {i: x for i, x in loop_cache.items() if len(x) > 0}
-ghost_step_map = {key[0]: (val[0], val[1] - val[0]) for key, val in loop_cache.items()}
 res = math.lcm(*[val[1] - val[0] for val in loop_cache.values()])
 print(f'Part 2: {res}')
