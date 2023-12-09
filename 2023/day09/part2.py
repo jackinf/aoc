@@ -14,12 +14,16 @@ for history in histories:
             seq.append(diff)
         collection.append(seq)
 
-    # Step 2. Find value by calculating last number of each step. Do it in reverse
+    # Step 2. Reverse for convenience
+    for i in range(len(collection)):
+        collection[i] = collection[i][::-1]
+
+    # Step 3. Find value by calculating last number of each step. Do it in reverse
     for i in range(len(collection) - 1, 0, -1):
-        new_val = collection[i - 1][-1] + collection[i][-1]
+        new_val = collection[i - 1][-1] - collection[i][-1]
         collection[i - 1].append(new_val)
 
     searched_values.append(collection[0][-1])
 
 total_result = sum(searched_values)
-print(f'Part 1: {total_result}')
+print(f'Part 2: {total_result}')
