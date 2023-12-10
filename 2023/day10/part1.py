@@ -9,13 +9,13 @@ def is_oob(grid, row, col):
 
 
 def find_start_dir(grid, row, col):
-    for dc, dr, valid in ((0, -1, {'-', 'L', 'F'}), (-1, 0, {'|', '7', 'F'}), (1, 0, {'|', 'L', 'J'}), (0, 1, {'-', 'J', '7'})):
+    for dr, dc, valid in ((0, -1, {'-', 'L', 'F'}), (-1, 0, {'|', '7', 'F'}), (1, 0, {'|', 'L', 'J'}), (0, 1, {'-', 'J', '7'})):
         next_row, next_col = row + dr, col + dc
 
         if is_oob(grid, next_row, next_col):
             continue
 
-        if grid[next_col][next_row] not in valid:
+        if grid[next_row][next_col] not in valid:
             continue
 
         return dc, dr
