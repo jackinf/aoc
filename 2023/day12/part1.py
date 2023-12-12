@@ -41,37 +41,49 @@ with open('sample.txt', 'r') as f:
     lines = [(list(group[0]), list(map(int, group[1].split(',')))) for group in [line.split() for line in f.read().split('\n')]]
 
 
-def backtrack(arr, counter, arr_pointer, counter_pointer, cache):
+def backtrack(arr, counter, arr_pointer, counter_pointer, acc, cache):
     # base case
-    if len(arr) <= arr_pointer:
-        return 1 if len(counter) == counter_pointer else 0
-    if len(counter) <= counter_pointer:
-        return 0
+    if len(arr) == arr_pointer:
+        # print(''.join(arr), counter)
+        if all(val == 0 for val in counter):
+            acc.add(''.join(arr))
+        return
+    if len(counter) == counter_pointer:
+        return
 
-    # optimization
-    if tuple(counter[counter_pointer:] + arr[arr_pointer:]) in cache:
-        return cache[tuple(arr + [str])]
-
-    subresult1, subresult2 = 0, 0
-    if arr[arr_pointer] in {'.', '?'}:
-        subresult1 = backtrack(arr, counter, arr_pointer + 1, counter_pointer, cache)
-
-    if arr[arr_pointer] in {'#', '?'}:
-        if counter[counter_pointer] == 1:
-            # move pointer 2 steps because if last '#' ends, then next is guaranteed '.'
-            subresult2 = backtrack(arr, counter, arr_pointer + 2, counter_pointer + 1, cache)
-        else:
+    if arr[arr_pointer] == '#':
+        # are we out of moves
+        if counter[counter_pointer] > 0:
             counter[counter_pointer] -= 1
-            subresult2 = backtrack(arr, counter, arr_pointer + 1, counter_pointer, cache)
+            inc = 1 if counter[counter_pointer] == 0 else 0
+            backtrack(arr, counter, arr_pointer + 1, counter_pointer + inc, acc, cache)
             counter[counter_pointer] += 1
 
-    return subresult1 + subresult2
+    elif arr[arr_pointer] == '.' and counter[counter_pointer] == 0:
+        backtrack(arr, counter, arr_pointer + 1, counter_pointer, acc, cache)
+
+    elif arr[arr_pointer] == '?':
+        if counter[counter_pointer] > 0:
+            counter[counter_pointer] -= 1
+            inc = 1 if counter[counter_pointer] == 0 else 0
+            backtrack(arr, counter, arr_pointer + 1, counter_pointer + inc, acc, cache)
+            counter[counter_pointer] += 1
+
+        # .-case
+        symbol, arr[arr_pointer] = arr[arr_pointer], '.'
+        backtrack(arr, counter, arr_pointer + 1, counter_pointer, acc, cache)
+        arr[arr_pointer] = symbol
+
 
 results = []
 cache = {}
-for arrangement, counter in lines:
-    result = backtrack(arrangement, counter, 0, 0, cache)
-    results.append(result)
+for arrangement, counter in lines[:1]:
+    # print('===')
+    print(''.join(arrangement))
+    acc = set()
+    backtrack(arrangement, counter, 0, 0, acc, cache)
+    print(acc)
+    results.append(len(acc))
 
 print(results)
 total_result = sum(results)
