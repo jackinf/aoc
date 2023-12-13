@@ -81,43 +81,55 @@ def outermost_coordinates(grid):
 
 
 def find_gaps(grid):
-    gaps = set()
+    hor_gaps, ver_gaps = {}, {}
     for i in range(len(grid) - 1):
         for j in range(len(grid[0]) - 1):
             left, right = grid[i][j], grid[i][j + 1]
             up, down = grid[i][j], grid[i + 1][j]
 
             if left in {'|', '7', 'J'} and right in {'|', 'F', 'L'}:
-                x1 = (min(i, j), max(i, j))
-                x2 = (min(i, j + 1), max(i, j + 1))
-                gaps.add((x1, x2))
+                x1 = (i, j)
+                x2 = (i, j + 1)
+                ver_gaps[x1] = x2
             if up in {'-', 'J', 'L'} and down in {'-', 'F', '7'}:
-                x1 = min(i, j), max(i, j)
-                x2 = (min(i + 1, j), max(i + 1, j))
-                gaps.add((x1, x2))
+                x1 = (i, j)
+                x2 = (i + 1, j)
+                hor_gaps[x1] = x2
 
-    return gaps
+    return hor_gaps, ver_gaps
 
 
-gaps = find_gaps(grid)
-pprint(gaps)
+hor_gaps, ver_gaps = find_gaps(grid)
+print('hor_gaps', hor_gaps)
+print('ver_gaps', ver_gaps)
 
 
 for row, col in outermost_coordinates(grid):
-    q = [(row, col)]
-    gap_q = []
+    q = [('cell', (row, col))]
     while q:
-        curr_row, curr_col = q.pop(0)
-        if is_oob(grid, curr_row, curr_col):
-            continue
-        if (curr_row, curr_col) in seen:
-            continue
-        seen.add((curr_row, curr_col))
-        grid[curr_row][curr_col] = '#'
+        type, info = q.pop(0)
+        if type == 'cell':
+            curr_row, curr_col = info
+            if is_oob(grid, curr_row, curr_col):
+                continue
+            if (curr_row, curr_col) in seen:
+                continue
+            seen.add((curr_row, curr_col))
+            grid[curr_row][curr_col] = '#'
 
-        for delta_row, delta_col in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)):
-            next_row, next_col = curr_row + delta_row, curr_col + delta_col
-            q.append((next_row, next_col))
+            for delta_row, delta_col in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)):
+                next_row, next_col = curr_row + delta_row, curr_col + delta_col
+                next_cell = (next_row, next_col)
+                q.append(('cell', next_cell))
+
+                if abs(delta_row) == 1 and next_cell in ver_gaps:
+                    q.append(('hor_gap', (next_cell, ver_gaps[next_cell])))
+                if abs(delta_col) == 1 and next_cell in hor_gaps:
+                    q.append(('ver_gap', (next_cell, hor_gaps[next_cell])))
+        if type == 'hor_gap':
+            print('hor_gap:', info)
+        if type == 'ver_gap':
+            print('ver_gap:', info)
 
 # debugging
 for row in range(len(grid)):
