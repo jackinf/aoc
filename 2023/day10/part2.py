@@ -1,8 +1,6 @@
-from pprint import pprint
-
 RIGHT, LEFT, UP, DOWN = (0, 1), (0, -1), (-1, 0), (1, 0)
-tiles_count = 0
-with open('sample5.txt') as f:
+step_count = 0
+with open('sample2.txt') as f:
     grid = [list(row) for row in f.read().split('\n')]
 
 
@@ -17,7 +15,6 @@ def find_start_dir(grid, row, col):
         if is_oob(grid, next_row, next_col):
             continue
 
-        print(next_col, next_row)
         if grid[next_row][next_col] not in valid:
             continue
 
@@ -56,6 +53,10 @@ def find_starting_pos(grid):
 def step(grid, row, col, dir_row, dir_col):
     next_row, next_col = row + dir_row, col + dir_col
     (next_dir_row, next_dir_col) = map_dir(grid[next_row][next_col], dir_row, dir_col)
+
+    global step_count
+    step_count += 1
+
     return (next_row, next_col), (next_dir_row, next_dir_col)
 
 
@@ -63,73 +64,48 @@ start_row, start_col = find_starting_pos(grid)
 curr_row, curr_col = start_row, start_col
 (curr_dir_col, curr_dir_row) = find_start_dir(grid, start_row, start_col)
 
-seen = set()
 
+turn_90deg = {
+    (1, 0): (0, -1),
+    (0, -1): (-1, 0),
+    (-1, 0): (0, 1),
+    (0, 1): (1, 0)
+}
+
+turn_90deg_neg = {
+    (1, 0): (0, 1),
+    (0, -1): (1, 0),
+    (-1, 0): (0, -1),
+    (0, 1): (-1, 0)
+}
+
+q = []
 while True:
     (curr_row, curr_col), (curr_dir_row, curr_dir_col) = step(grid, curr_row, curr_col, curr_dir_row, curr_dir_col)
-
-    seen.add((curr_row, curr_col))
-    # grid[curr_row][curr_col] = 'X'
 
     if (curr_row, curr_col) == (start_row, start_col):
         break
 
-
-def outermost_coordinates(grid):
-    rows, cols = len(grid), len(grid[0])
-    return [(r, c) for r in range(rows) for c in range(cols) if r in [0, rows-1] or c in [0, cols-1]]
-
-
-def find_gaps(grid):
-    hor_gaps, ver_gaps = {}, {}
-    for i in range(len(grid) - 1):
-        for j in range(len(grid[0]) - 1):
-            left, right = grid[i][j], grid[i][j + 1]
-            up, down = grid[i][j], grid[i + 1][j]
-
-            if left in {'|', '7', 'J'} and right in {'|', 'F', 'L'}:
-                x1 = (i, j)
-                x2 = (i, j + 1)
-                ver_gaps[x1] = x2
-            if up in {'-', 'J', 'L'} and down in {'-', 'F', '7'}:
-                x1 = (i, j)
-                x2 = (i + 1, j)
-                hor_gaps[x1] = x2
-
-    return hor_gaps, ver_gaps
+    # check to the right
+    right_row_dir, right_col_dir = turn_90deg_neg[(curr_dir_row, curr_dir_col)]
+    right_row, right_col = curr_row + right_row_dir, curr_col + right_col_dir
+    q.append((right_row, right_col))
 
 
-hor_gaps, ver_gaps = find_gaps(grid)
-print('hor_gaps', hor_gaps)
-print('ver_gaps', ver_gaps)
+while q:
+    curr_row, curr_col = q.pop(0)
+    if is_oob(grid, curr_row, curr_col):
+        continue
 
+    if grid[curr_row][curr_col] != '.':
+        continue
+    grid[curr_row][curr_col] = '#'
 
-for row, col in outermost_coordinates(grid):
-    q = [('cell', (row, col))]
-    while q:
-        type, info = q.pop(0)
-        if type == 'cell':
-            curr_row, curr_col = info
-            if is_oob(grid, curr_row, curr_col):
-                continue
-            if (curr_row, curr_col) in seen:
-                continue
-            seen.add((curr_row, curr_col))
-            grid[curr_row][curr_col] = '#'
+    # cells
+    for delta_row, delta_col in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)):
+        next_row, next_col = curr_row + delta_row, curr_col + delta_col
+        q.append((next_row, next_col))
 
-            for delta_row, delta_col in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)):
-                next_row, next_col = curr_row + delta_row, curr_col + delta_col
-                next_cell = (next_row, next_col)
-                q.append(('cell', next_cell))
-
-                if abs(delta_row) == 1 and next_cell in ver_gaps:
-                    q.append(('hor_gap', (next_cell, ver_gaps[next_cell])))
-                if abs(delta_col) == 1 and next_cell in hor_gaps:
-                    q.append(('ver_gap', (next_cell, hor_gaps[next_cell])))
-        if type == 'hor_gap':
-            print('hor_gap:', info)
-        if type == 'ver_gap':
-            print('ver_gap:', info)
 
 # debugging
 for row in range(len(grid)):
@@ -138,6 +114,6 @@ for row in range(len(grid)):
         print(grid[row][col], end="")
 print()
 
-tiles_count = len([x for y in grid for x in y if x != "#" and x != 'X'])
+tiles_count = len([x for y in grid for x in y if x == '.'])
 
 print(f'Part 2: {tiles_count}')
