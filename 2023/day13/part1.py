@@ -1,4 +1,4 @@
-with open('sample.txt', 'r') as f:
+with open('input.txt', 'r') as f:
     patterns = [[list(x) for x in pattern.split('\n')] for pattern in f.read().split('\n\n')]
 
 
@@ -21,27 +21,25 @@ def is_horizontally_symmetrical(grid, row1, row2):
         row2 += 1
     return True
 
+
 verticals, horizontals = [], []
 for pattern in patterns:
-    # check verticals
     ROWS, COLS = len(pattern), len(pattern[0])
 
-    res1 = is_vertically_symmetrical(pattern, COLS // 2 - 1, COLS // 2)
-    if res1:
-        verticals.append(COLS // 2)
-    res2 = is_vertically_symmetrical(pattern, COLS // 2, COLS // 2 + 1) if COLS % 2 == 1 else False
-    if res2:
-        verticals.append(COLS // 2 + 1)
+    # check verticals
+    for col in range(COLS - 1):
+        if is_vertically_symmetrical(pattern, col, col + 1):
+            verticals.append(col + 1)
+            break
 
     # check horizontals
-    res3 = is_horizontally_symmetrical(pattern, ROWS // 2 - 1, ROWS // 2)
-    if res3:
-        horizontals.append(ROWS // 2)
-    res4 = is_horizontally_symmetrical(pattern, ROWS // 2, ROWS // 2 + 1) if ROWS % 2 == 1 else False
-    if res4:
-        horizontals.append(ROWS // 2 + 1)
+    for row in range(ROWS - 1):
+        if is_horizontally_symmetrical(pattern, row, row + 1):
+            horizontals.append(row + 1)
+            break
 
 verticals_total = sum(verticals)
 horizontals_total = 100 * sum(horizontals)
 total = horizontals_total + verticals_total
+
 print(f'Part 1: {total}')
