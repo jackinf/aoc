@@ -22,9 +22,9 @@ def is_horizontally_symmetrical(grid, row1, row2):
     return True
 
 
-verticals, horizontals = [], []
 def scan(pattern):
     global horizontals, verticals
+    verticals, horizontals = [], []
     ROWS, COLS = len(pattern), len(pattern[0])
 
     # check verticals
@@ -37,12 +37,31 @@ def scan(pattern):
         if is_horizontally_symmetrical(pattern, row, row + 1):
             horizontals.append(row + 1)
 
+    return verticals, horizontals
 
+
+total = 0
 for pattern in patterns:
-    scan(pattern)
+    vs, hs = scan(pattern)
+    vs_excl, hs_excl = set(vs), set(hs)
 
-verticals_total = sum(verticals)
-horizontals_total = 100 * sum(horizontals)
-total = horizontals_total + verticals_total
+    all_verticals = set()
+    all_horizontals = set()
+    for row in range(len(pattern)):
+        for col in range(len(pattern[0])):
+            old_symbol = pattern[row][col]
+            pattern[row][col] = '#' if old_symbol == '.' else '.'
+            vs, hs = scan(pattern)
+            for v in vs:
+                if v not in vs_excl:
+                    all_verticals.add(v)
+            for h in hs:
+                if h not in hs_excl:
+                    all_horizontals.add(h)
+            pattern[row][col] = old_symbol
 
-print(f'Part 1: {total}')
+    verticals_total = sum(all_verticals)
+    horizontals_total = 100 * sum(all_horizontals)
+    total += horizontals_total + verticals_total
+
+print(f'Part 2: {total}')
