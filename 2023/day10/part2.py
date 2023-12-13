@@ -60,6 +60,40 @@ def step(grid, row, col, dir_row, dir_col):
     return (next_row, next_col), (next_dir_row, next_dir_col)
 
 
+connections = {
+    'J': ((-1, 0), (0, -1)),
+    'L': ((-1, 0), (0, 1)),
+    '|': ((-1, 0), (1, 0)),
+    '-': ((0, -1), (0, 1)),
+    'F': ((0, 1), (1, 0)),
+    '7': ((0, -1), (1, 0)),
+}
+
+def junk_to_dots(grid):
+    for row in range(len(grid)):
+        for col in range(len(grid[0])):
+            if grid[row][col] not in connections:
+                continue
+
+            valid = True
+            for x, y in connections[grid[row][col]]:
+                if is_oob(grid, x, y):
+                    valid = False
+                    break
+
+            if not valid:
+                grid[row][col] = '.'
+
+# junk_to_dots(grid)
+
+# debugging
+for row in range(len(grid)):
+    print()
+    for col in range(len(grid[0])):
+        print(grid[row][col], end="")
+print()
+
+
 start_row, start_col = find_starting_pos(grid)
 curr_row, curr_col = start_row, start_col
 (curr_dir_col, curr_dir_row) = find_start_dir(grid, start_row, start_col)
