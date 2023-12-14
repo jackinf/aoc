@@ -1,6 +1,6 @@
 RIGHT, LEFT, UP, DOWN = (0, 1), (0, -1), (-1, 0), (1, 0)
 step_count = 0
-with open('sample2.txt') as f:
+with open('input.txt') as f:
     grid = [list(row) for row in f.read().split('\n')]
 
 
@@ -60,6 +60,15 @@ def step(grid, row, col, dir_row, dir_col):
     return (next_row, next_col), (next_dir_row, next_dir_col)
 
 
+def debug_grid(grid):
+    # debugging
+    for row in range(len(grid)):
+        print()
+        for col in range(len(grid[0])):
+            print(grid[row][col], end="")
+    print()
+
+
 connections = {
     'J': ((-1, 0), (0, -1)),
     'L': ((-1, 0), (0, 1)),
@@ -69,29 +78,7 @@ connections = {
     '7': ((0, -1), (1, 0)),
 }
 
-def junk_to_dots(grid):
-    for row in range(len(grid)):
-        for col in range(len(grid[0])):
-            if grid[row][col] not in connections:
-                continue
-
-            valid = True
-            for x, y in connections[grid[row][col]]:
-                if is_oob(grid, x, y):
-                    valid = False
-                    break
-
-            if not valid:
-                grid[row][col] = '.'
-
-# junk_to_dots(grid)
-
-# debugging
-for row in range(len(grid)):
-    print()
-    for col in range(len(grid[0])):
-        print(grid[row][col], end="")
-print()
+# debug_grid(grid)
 
 
 start_row, start_col = find_starting_pos(grid)
@@ -113,18 +100,36 @@ turn_90deg_neg = {
     (0, 1): (-1, 0)
 }
 
-q = []
+seen = set()
+q_clock = []
+q_counter_clock = []
 while True:
     (curr_row, curr_col), (curr_dir_row, curr_dir_col) = step(grid, curr_row, curr_col, curr_dir_row, curr_dir_col)
+    seen.add((curr_row, curr_col))
 
     if (curr_row, curr_col) == (start_row, start_col):
         break
 
     # check to the right
-    right_row_dir, right_col_dir = turn_90deg_neg[(curr_dir_row, curr_dir_col)]
-    right_row, right_col = curr_row + right_row_dir, curr_col + right_col_dir
-    q.append((right_row, right_col))
+    right_row_dir, right_col_dir = turn_90deg[(curr_dir_row, curr_dir_col)]
+    q_clock.append((curr_row + right_row_dir, curr_col + right_col_dir))
 
+    left_row_dir, left_col_dir = turn_90deg_neg[(curr_dir_row, curr_dir_col)]
+    q_counter_clock.append((curr_row + left_row_dir, curr_col + left_col_dir))
+
+
+# remove junk
+for row in range(len(grid)):
+    for col in range(len(grid[0])):
+        if (row, col) not in seen and grid[row][col] in {'-', '|', '7', 'L', 'J', 'F'}:
+            grid[row][col] = '.'
+
+# debug_grid(grid)
+
+
+# TODO: decide if to accept counter clockwise or just clockwise
+q = q_counter_clock
+q = q_clock
 
 while q:
     curr_row, curr_col = q.pop(0)
@@ -140,14 +145,10 @@ while q:
         next_row, next_col = curr_row + delta_row, curr_col + delta_col
         q.append((next_row, next_col))
 
-
-# debugging
-for row in range(len(grid)):
-    print()
-    for col in range(len(grid[0])):
-        print(grid[row][col], end="")
-print()
+debug_grid(grid)
 
 tiles_count = len([x for y in grid for x in y if x == '.'])
 
 print(f'Part 2: {tiles_count}')
+# 5705
+# 275 - too high
