@@ -1,5 +1,3 @@
-from pprint import pprint
-
 with open('sample.txt', 'r') as f:
     grid = [list(line) for line in f.read().split('\n')]
 
@@ -42,9 +40,11 @@ def get_total_score(scores):
     return sum([sum(values) for values in scores])
 
 
-def get_results_key(results):
+def get_results_key(i, results):
     flat = [x for y in results for x in y]
-    return ''.join([f'{a}{b}' for a,b in flat])
+    results_key = ''.join([f'{a}{b}|' for a,b in flat])
+    return results_key
+    # return f'{i}-{results_key}'
 
 
 def debug(grid):
@@ -56,17 +56,38 @@ def debug(grid):
 
 
 seen = {}
-# while True:
-for i in range(4):
-    results, scores = calculate(grid)
-    print(results, get_results_key(results))
-    # TODO: calculate cache from results, map cached results to score & i
-    # print(get_total_score(scores))
-    grid = construct_grid2(grid, results)
-    grid = list(zip(*grid[::-1]))
+cycle = 1
+found = False
+cycle_start = -1
+cycle_length = -1
+MAX = 1_000_000_000
+# MAX = 3
+while cycle <= MAX:
+    for i in ('N', 'W', 'S', 'E'):
+        results, scores = calculate(grid)
 
-    # print(f'After {cycle + 1} cycle:')
-    # debug(grid)
+        if not found:
+            key = get_results_key(i, results)
+            if key in seen:
+                cycle_start = seen[key]
+                cycle_length = cycle - seen[key]
+                print(f'found a cycle! current count={cycle}, length={cycle_length}, previous at={cycle_start}')
+                print(cycle, cycle_start, cycle_length)
+                cycle = ((MAX - cycle_start) // cycle_length * cycle_length) + cycle_start
+                found = True
+            seen[key] = cycle
 
-# total = sum([sum(values) for values in results])
-# print(f'Part 1: {total}')
+        grid = construct_grid2(grid, results)
+        # grid = list(zip(*grid))[::-1]  # 90 deg counter-clockwise
+        grid = list(zip(*grid[::-1]))  # 90 deg clockwise
+
+    cycle += 1
+
+results, scores = calculate(grid)
+grid = construct_grid2(grid, results)
+debug(grid)
+
+# wrong solution
+print(f'Part 2: {get_total_score(scores)}')
+
+# 109449 - too high
