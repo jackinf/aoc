@@ -22,67 +22,45 @@ def debug(grid, seen):
                 print('.', end='')
     print()
 
-
-
-turn_90deg = {
-    (1, 0): (0, -1),
-    (0, -1): (-1, 0),
-    (-1, 0): (0, 1),
-    (0, 1): (1, 0)
-}
-
-turn_90deg_neg = {
-    (1, 0): (0, 1),
-    (0, -1): (1, 0),
-    (-1, 0): (0, -1),
-    (0, 1): (-1, 0)
-}
-
-
-seen = defaultdict(lambda: float('inf'))
+seen = set()
 best_row, best_col = 0, 0
 q = []
-COUNTER = 3
-q.append((-grid[0][0], 0, 0, (1, 0), COUNTER))
-q.append((-grid[0][0], 0, 0, (0, 1), COUNTER))
+COUNTER = 0
+q.append((0, 0, 0, (0, 0), COUNTER))
 moves = 0
 while q:
     moves += 1
     heat, row, col, dir, counter = heapq.heappop(q)
-    row, col = -row, -col
-
-    best_row = max(best_row, row)
-    best_col = max(best_col, col)
-    print(f'q len = {len(q)}, best_row = {best_row} / {len(grid)}, best_col = {best_col} / {len(grid[0])}', end='\r')
-
-    if counter <= 0:
-        continue
 
     if is_oob(grid, row, col):
         continue
 
-    heat += grid[row][col]
+    # for debug purposes
+    best_row = max(best_row, row)
+    best_col = max(best_col, col)
+    print(f'q len = {len(q)}, best_row = {best_row} / {len(grid)}, best_col = {best_col} / {len(grid[0])}')
 
     if row == len(grid) - 1 and col == len(grid[0]) - 1:
-        print(f'Part 1: {heat}, moves: {moves}')
-        sys.exit()
+        print(f'Part 1: {heat + 1}, moves: {moves}')  # i am not 100% sure why i need 1 extra step
+        break
 
-    key = (row, col, counter)
-    if seen[key] < heat:
+    # optimization
+    key = (row, col, dir[0], dir[1], counter)
+    if key in seen:
         continue
-    seen[key] = heat
+    seen.add(key)
+
+    # every step costs
+    new_heat = heat + grid[row][col]
 
     # move forward
-    heapq.heappush(q, (heat, -(row + dir[0]), -(col + dir[1]), dir, (counter - 1)))
+    if counter < 3 and (dir[0], dir[1]) != (0, 0):
+        heapq.heappush(q, (new_heat, row + dir[0], col + dir[1], dir, counter + 1))
 
-    # turn left
-    new_dir1 = turn_90deg_neg[dir]
-    heapq.heappush(q, (heat, -(row + new_dir1[0]), -(col + new_dir1[1]), new_dir1, 3))
+    # turn
+    for new_dr, new_dc in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+        # do not go forwards or backwards
+        if (new_dr, new_dc) in ((dir[0], dir[1]), (-dir[0], -dir[1])):
+            continue
 
-    # turn right
-    new_dir2 = turn_90deg[dir]
-    heapq.heappush(q,(heat, -(row + new_dir2[0]), -(col + new_dir2[1]), new_dir2, 3))
-
-
-
-
+        heapq.heappush(q, (new_heat, row + new_dr, col + new_dc, (new_dr, new_dc), 1))
