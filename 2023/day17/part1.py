@@ -1,4 +1,6 @@
+import sys
 from collections import defaultdict
+import heapq
 
 with open('input.txt', 'r') as f:
     grid = [list(map(int, list(line))) for line in f.read().split('\n')]
@@ -36,17 +38,21 @@ turn_90deg_neg = {
 }
 
 
-best = float('inf')
 seen = defaultdict(lambda: float('inf'))
+best_row, best_col = 0, 0
 q = []
-COUNTER = 1
-# q.append((0, 0, -grid[0][0], (1, 0), COUNTER, []))
-# q.append((0, 0, -grid[0][0], (0, 1), COUNTER, []))
-q.append((0, 0, -grid[0][0], (1, 0), COUNTER))
-q.append((0, 0, -grid[0][0], (0, 1), COUNTER))
+COUNTER = 3
+q.append((-grid[0][0], 0, 0, (1, 0), COUNTER))
+q.append((-grid[0][0], 0, 0, (0, 1), COUNTER))
+moves = 0
 while q:
-    # row, col, heat, dir, counter, path = q.pop(0)
-    row, col, heat, dir, counter = q.pop(0)
+    moves += 1
+    heat, row, col, dir, counter = heapq.heappop(q)
+    row, col = -row, -col
+
+    best_row = max(best_row, row)
+    best_col = max(best_col, col)
+    print(f'q len = {len(q)}, best_row = {best_row} / {len(grid)}, best_col = {best_col} / {len(grid[0])}', end='\r')
 
     if counter <= 0:
         continue
@@ -55,13 +61,10 @@ while q:
         continue
 
     heat += grid[row][col]
-    # path.append((row, col))
 
-    if row == len(grid) - 1 and col == len(grid[0]) - 1 and best > heat:
-        # debug(grid, path)
-        # print(f'result: {heat}')
-        best = heat
-        continue
+    if row == len(grid) - 1 and col == len(grid[0]) - 1:
+        print(f'Part 1: {heat}, moves: {moves}')
+        sys.exit()
 
     key = (row, col, counter)
     if seen[key] < heat:
@@ -69,20 +72,16 @@ while q:
     seen[key] = heat
 
     # move forward
-    # q.append((row + dir[0], col + dir[1], heat, dir, counter - 1, path[:]))
-    q.append((row + dir[0], col + dir[1], heat, dir, counter - 1))
+    heapq.heappush(q, (heat, -(row + dir[0]), -(col + dir[1]), dir, (counter - 1)))
 
     # turn left
     new_dir1 = turn_90deg_neg[dir]
-    # q.append((row + new_dir1[0], col + new_dir1[1], heat, new_dir1, 3, path[:]))
-    q.append((row + new_dir1[0], col + new_dir1[1], heat, new_dir1, 3))
+    heapq.heappush(q, (heat, -(row + new_dir1[0]), -(col + new_dir1[1]), new_dir1, 3))
 
     # turn right
     new_dir2 = turn_90deg[dir]
-    # q.append((row + new_dir2[0], col + new_dir2[1], heat, new_dir2, 3, path[:]))
-    q.append((row + new_dir2[0], col + new_dir2[1], heat, new_dir2, 3))
+    heapq.heappush(q,(heat, -(row + new_dir2[0]), -(col + new_dir2[1]), new_dir2, 3))
 
 
-print(f'Part 1: {best}')
 
 
