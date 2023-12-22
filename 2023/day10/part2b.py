@@ -1,5 +1,6 @@
 from pprint import pprint
 
+# FAIL
 RIGHT, LEFT, UP, DOWN = (0, 1), (0, -1), (-1, 0), (1, 0)
 step_count = 0
 with open('sample2.txt') as f:

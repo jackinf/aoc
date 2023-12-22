@@ -2,6 +2,7 @@ import sys
 from collections import defaultdict
 import heapq
 
+# FAIL
 with open('input.txt', 'r') as f:
     grid = [list(map(int, list(line))) for line in f.read().split('\n')]
 
