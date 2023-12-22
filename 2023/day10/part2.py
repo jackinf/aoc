@@ -1,5 +1,3 @@
-
-# FAIL
 RIGHT, LEFT, UP, DOWN = (0, 1), (0, -1), (-1, 0), (1, 0)
 step_count = 0
 with open('input.txt') as f:
@@ -62,12 +60,15 @@ def step(grid, row, col, dir_row, dir_col):
     return (next_row, next_col), (next_dir_row, next_dir_col)
 
 
-def debug_grid(grid):
+def debug_grid(grid, seen, outside):
     # debugging
     for row in range(len(grid)):
         print()
         for col in range(len(grid[0])):
-            print(grid[row][col], end="")
+            if (row, col) in seen or (row, col) in outside:
+                print("#", end="")
+            else:
+                print(grid[row][col], end="")
     print()
 
 
@@ -103,21 +104,12 @@ turn_90deg_neg = {
 }
 
 seen = set()
-q_clock = []
-q_counter_clock = []
 while True:
     (curr_row, curr_col), (curr_dir_row, curr_dir_col) = step(grid, curr_row, curr_col, curr_dir_row, curr_dir_col)
     seen.add((curr_row, curr_col))
 
     if (curr_row, curr_col) == (start_row, start_col):
         break
-
-    # check to the right
-    right_row_dir, right_col_dir = turn_90deg[(curr_dir_row, curr_dir_col)]
-    q_clock.append((curr_row + right_row_dir, curr_col + right_col_dir))
-
-    left_row_dir, left_col_dir = turn_90deg_neg[(curr_dir_row, curr_dir_col)]
-    q_counter_clock.append((curr_row + left_row_dir, curr_col + left_col_dir))
 
 
 # remove junk
@@ -126,31 +118,30 @@ for row in range(len(grid)):
         if (row, col) not in seen and grid[row][col] in {'-', '|', '7', 'L', 'J', 'F'}:
             grid[row][col] = '.'
 
-# debug_grid(grid)
 
+outside = set()
+for row in range(len(grid)):
+    inside = False
+    up = False
+    for col in range(len(grid[0])):
+        val = grid[row][col]
+        if val == "|":
+            inside = not inside
+        elif val == "L":
+            up = True
+        elif val == "F":
+            up = False
+        elif val == "7" and up:
+            inside = not inside
+        elif val == "J" and not up:
+            inside = not inside
 
-# TODO: decide if to accept counter clockwise or just clockwise
-q = q_counter_clock
-q = q_clock
+        if not inside:
+            outside.add((row, col))
 
-while q:
-    curr_row, curr_col = q.pop(0)
-    if is_oob(grid, curr_row, curr_col):
-        continue
+debug_grid(grid, outside, seen)
 
-    if grid[curr_row][curr_col] != '.':
-        continue
-    grid[curr_row][curr_col] = '#'
+total_count = len(grid) * len(grid[0])
 
-    # cells
-    for delta_row, delta_col in ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)):
-        next_row, next_col = curr_row + delta_row, curr_col + delta_col
-        q.append((next_row, next_col))
-
-debug_grid(grid)
-
-tiles_count = len([x for y in grid for x in y if x == '.'])
-
-print(f'Part 2: {tiles_count}')
-# 5705
-# 275 - too high
+total = total_count - len(outside | seen)
+print(f'Part 2: {total}')
