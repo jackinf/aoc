@@ -1,2 +1,4 @@
 matplotlib
 sympy
+networkx
+scipy
