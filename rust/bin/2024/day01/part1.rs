@@ -31,7 +31,7 @@ fn main() {
     for i in 0..lefts.len() {
         let left = lefts[i];
         let right = rights[i];
-        let result= (left - right).abs();
+        let result = (left - right).abs();
         final_result += result;
     }
 

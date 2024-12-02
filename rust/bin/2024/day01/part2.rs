@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use log::debug;
+use std::collections::HashMap;
 
 fn main() {
     let contents = include_str!("input.txt");
