@@ -44,3 +44,5 @@ __pycache__/
 /target
 
 target
+
+.DS_Store
