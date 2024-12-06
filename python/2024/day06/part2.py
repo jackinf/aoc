@@ -4,6 +4,7 @@ with open('input.txt') as f:
 # Find x, y position of ^ character
 cx, cy = next((y, x) for y, row in enumerate(grid) for x, val in enumerate(row) if val == '^')
 grid[cx][cy] = '.'
+start_x, start_y = cx, cy
 
 # Directions: up, right, down, left
 directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
@@ -86,13 +87,17 @@ while True:
         # Check if we are in the loop
         if tx is not None:
             if is_horizontal and (nx, ny) in horizontally_visited:
-                # debug_grid()
-                successful_enclosures.add((tx + dx, ty + dy))
+                cand_x, cand_y = tx + dx, ty + dy
+                if 0 <= cand_x < len(grid) and 0 <= cand_y < len(grid[0]) and grid[cand_x][cand_y] == '.':
+                    # debug_grid()
+                    successful_enclosures.add((tx + dx, ty + dy))
                 reset()
                 continue
             if not is_horizontal and (nx, ny) in vertically_visited:
-                # debug_grid()
-                successful_enclosures.add((tx + dx, ty + dy))
+                cand_x, cand_y = tx + dx, ty + dy
+                if 0 <= cand_x < len(grid) and 0 <= cand_y < len(grid[0]) and grid[cand_x][cand_y] == '.':
+                    # debug_grid()
+                    successful_enclosures.add((tx + dx, ty + dy))
                 reset()
                 continue
 
@@ -112,6 +117,8 @@ while True:
         continue
 
     raise Exception(f'Unsupported cell type at ({nx}, {ny}): {grid[nx][ny]}')
+
+successful_enclosures.remove((start_x, start_y))
 
 # Debug output
 # debug_grid_enclosures()
