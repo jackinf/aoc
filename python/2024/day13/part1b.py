@@ -4,7 +4,7 @@ with open('input.txt') as f:
 LIMIT = 100
 A_COST = 3
 B_COST = 1
-DEBUG = True
+DEBUG = False
 
 
 # debug printer
@@ -36,7 +36,11 @@ def find_candidates(steps_per_a_press, steps_per_b_press, target_steps, a_press_
 
             tokens = a_presses * a_press_cost + b_presses * b_press_cost
             pr(f'found! A presses={a_presses} B presses={b_presses} tokens={tokens}')
-            candidates.add(tokens)
+
+            if a_press_cost == A_COST and b_press_cost == B_COST:
+                candidates.add((a_presses, b_presses))
+            else:
+                candidates.add((b_presses, a_presses))
 
     return candidates
 
@@ -60,7 +64,8 @@ for block_index, block_raw in enumerate(blocks_raw):
 
     common = sorted(list(x_candidates & y_candidates))
     if len(common) > 0:
-        result = common[0]
+        a_presses, b_presses = common[0]
+        result = a_presses * A_COST + b_presses * B_COST
         final_result += result
         pr(f'Found {result}')
     else:
@@ -68,6 +73,3 @@ for block_index, block_raw in enumerate(blocks_raw):
 
 
 print(f'Part 1: {final_result}')
-# attempted 51744 - too high
-# attempted 38905 - too high
-# attempted 37630 - too low
