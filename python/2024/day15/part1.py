@@ -104,7 +104,6 @@ def run():
                 final_result += score(row, col)
 
     print(f'Part 1: {final_result}')
-    # attempted 1559091 - too low
 
 run()
 
