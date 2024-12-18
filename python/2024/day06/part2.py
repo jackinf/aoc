@@ -1,4 +1,5 @@
-from typing import Tuple
+from typing import Tuple, Set
+from itertools import cycle
 
 WALL = '#'
 EMPTY = '.'
@@ -16,7 +17,7 @@ def read_input():
         lines = f.read().split('\n')
         grid = [list(x) for x in lines]
 
-    start = next((y, x) for y, row in enumerate(grid) for x, val in enumerate(row) if val == '^')
+    start = next((y, x) for y, row in enumerate(grid) for x, val in enumerate(row) if val == PLAYER)
     grid[start[0]][start[1]] = EMPTY
 
     return grid, start
@@ -24,12 +25,11 @@ def read_input():
 
 def debug_grid(grid, blocks):
     """Print the grid with successful enclosures marked."""
-    unique_blocks = set(blocks)
 
     print()
     for row in range(len(grid)):
         for col in range(len(grid[0])):
-            if (row, col) in unique_blocks:
+            if (row, col) in blocks:
                 print('O', end='')
             else:
                 print(grid[row][col], end='')
@@ -38,8 +38,10 @@ def debug_grid(grid, blocks):
     print()
 
 
-def check_if_loop(grid, dir_index: int, curr: Tuple[int, int]):
+def check_if_loop(grid, dir_index_: int, curr: Tuple[int, int]):
+    dir_index = (dir_index_ + 1) % len(directions)
     seen = set()
+    seen.add(curr)
 
     while True:
         delta = directions[dir_index]
@@ -50,7 +52,7 @@ def check_if_loop(grid, dir_index: int, curr: Tuple[int, int]):
             return False  # we are NOT in the loop
 
         # have we already entered this cell (from this direction) before?
-        seen_key = (nei_row, nei_col, dir_index)
+        seen_key = (nei_row, nei_col, delta)
         if seen_key in seen:
             return True  # we are in the loop
         seen.add(seen_key)
@@ -69,7 +71,7 @@ def check_if_loop(grid, dir_index: int, curr: Tuple[int, int]):
 
 def walk_till_exit(grid, curr: Tuple[int, int]):
     dir_index = 0
-    blocks = []
+    blocks = set()
 
     while True:
         delta = directions[dir_index]
@@ -90,23 +92,30 @@ def walk_till_exit(grid, curr: Tuple[int, int]):
             # let's test if we are in the loop by putting a wall in front of us
             grid[nei_row][nei_col] = WALL  # set the wall
             if check_if_loop(grid, dir_index, curr):
-                blocks.append((nei_row, nei_col))
+                blocks.add((nei_row, nei_col))
             grid[nei_row][nei_col] = EMPTY  # revert
 
             curr = nei_row, nei_col
             continue
 
+        raise Exception('should not get here')
+
 
 def run():
     grid, start = read_input()
-    blocks = walk_till_exit(grid, start)
+    blocks: Set[Tuple[int, int]] = walk_till_exit(grid, start)
+
+    if start in blocks:
+        blocks.remove(start)
 
     debug_grid(grid, blocks)
-    print(f'Part 2: {len(set(blocks))}')
+    print(f'Part 2: {len(blocks)}')
 
 
 run()
 # 2657 - wrong
 # 1914 - wrong
 # 1781 - wrong
+# 1780 - wrong
+# 1771 - wrong
 
