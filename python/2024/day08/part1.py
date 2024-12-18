@@ -1,11 +1,11 @@
 from collections import defaultdict
 
-# with open('python/2024/day08/sample.txt') as f:
-with open('python/2024/day08/input.txt') as f:
+# with open('sample.txt') as f:
+with open('input.txt') as f:
     lines = f.read().split('\n')
     grid = [list(line) for line in lines]
 
-M, N =len(grid), len(grid[0])
+M, N = len(grid), len(grid[0])
 
 # find coordinates
 type_coords = defaultdict(set)

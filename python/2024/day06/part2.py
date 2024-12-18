@@ -1,39 +1,35 @@
-with open('input.txt') as f:
-    grid = [list(x) for x in f.read().splitlines()]
+from typing import Tuple
 
-# Find x, y position of ^ character
-cx, cy = next((y, x) for y, row in enumerate(grid) for x, val in enumerate(row) if val == '^')
-grid[cx][cy] = '.'
-start_x, start_y = cx, cy
+WALL = '#'
+EMPTY = '.'
+PLAYER = '^'
+LIMIT = 1000
+N = (-1, 0)
+S = (1, 0)
+E = (0, 1)
+W = (0, -1)
+directions = [N, E, S, W]
 
-# Directions: up, right, down, left
-directions = [(-1, 0), (0, 1), (1, 0), (0, -1)]
-dir_index = 0  # Initial direction index
 
-def debug_grid():
+def read_input():
+    with open('input.txt') as f:
+        lines = f.read().split('\n')
+        grid = [list(x) for x in lines]
+
+    start = next((y, x) for y, row in enumerate(grid) for x, val in enumerate(row) if val == '^')
+    grid[start[0]][start[1]] = EMPTY
+
+    return grid, start
+
+
+def debug_grid(grid, blocks):
     """Print the grid with successful enclosures marked."""
+    unique_blocks = set(blocks)
+
     print()
     for row in range(len(grid)):
         for col in range(len(grid[0])):
-            if (row, col) in horizontally_visited and (row, col) not in vertically_visited:
-                print('-', end='')
-            elif (row, col) not in horizontally_visited and (row, col) in vertically_visited:
-                print('|', end='')
-            elif (row, col) in horizontally_visited and (row, col) in vertically_visited:
-                print('+', end='')
-            else:
-                print(grid[row][col], end='')
-        print()
-    print('====')
-    print()
-
-
-def debug_grid_enclosures():
-    """Print the grid with successful enclosures marked."""
-    print()
-    for row in range(len(grid)):
-        for col in range(len(grid[0])):
-            if (row, col) in successful_enclosures:
+            if (row, col) in unique_blocks:
                 print('O', end='')
             else:
                 print(grid[row][col], end='')
@@ -41,85 +37,76 @@ def debug_grid_enclosures():
     print('====')
     print()
 
-# State tracking
-visited = set()
-horizontally_visited = set()
-vertically_visited = set()
-already_tested_enclosures = set()
-successful_enclosures = set()
-tx, ty, t_dir = None, None, None  # Tracking enclosure test state
 
-def reset():
-    """Reset the current enclosure test."""
-    global cx, cy, dir_index, tx, ty, t_dir, horizontally_visited, vertically_visited
-    cx, cy, dir_index = tx, ty, t_dir
-    tx, ty, t_dir = None, None, None
-    visited.clear()
-    horizontally_visited.clear()
-    vertically_visited.clear()
+def check_if_loop(grid, dir_index: int, curr: Tuple[int, int]):
+    seen = set()
 
+    while True:
+        delta = directions[dir_index]
+        nei_row, nei_col = tuple(map(sum, zip(curr, delta)))
 
-while True:
-    dx, dy = directions[dir_index]
-    nx, ny = cx + dx, cy + dy  # Calculate next position
-    is_horizontal = dy != 0  # Check if the move is horizontal
+        # if we manage to exit the grid, then we're not in the loop
+        if not (0 <= nei_row < len(grid) and 0 <= nei_col < len(grid[0])):
+            return False  # we are NOT in the loop
 
-    if tx is not None:
-        if is_horizontal:
-            horizontally_visited.add((cx, cy))
-        else:
-            vertically_visited.add((cx, cy))
+        # have we already entered this cell (from this direction) before?
+        seen_key = (nei_row, nei_col, dir_index)
+        if seen_key in seen:
+            return True  # we are in the loop
+        seen.add(seen_key)
 
-    # Out-of-bounds check
-    if not (0 <= nx < len(grid) and 0 <= ny < len(grid[0])):
-        if tx is not None:  # If testing an enclosure, reset state
-            reset()
-            continue
-        break  # End simulation if out of bounds and not testing
-
-    # Handle walls (#)
-    if grid[nx][ny] == '#':
-        dir_index = (dir_index + 1) % len(directions)  # Rotate 90° clockwise
-        continue
-
-    # Handle empty cells (.)
-    if grid[nx][ny] == '.':
-        # Check if we are in the loop
-        if tx is not None:
-            if is_horizontal and (nx, ny) in horizontally_visited:
-                cand_x, cand_y = tx + dx, ty + dy
-                if 0 <= cand_x < len(grid) and 0 <= cand_y < len(grid[0]) and grid[cand_x][cand_y] == '.':
-                    # debug_grid()
-                    successful_enclosures.add((tx + dx, ty + dy))
-                reset()
-                continue
-            if not is_horizontal and (nx, ny) in vertically_visited:
-                cand_x, cand_y = tx + dx, ty + dy
-                if 0 <= cand_x < len(grid) and 0 <= cand_y < len(grid[0]) and grid[cand_x][cand_y] == '.':
-                    # debug_grid()
-                    successful_enclosures.add((tx + dx, ty + dy))
-                reset()
-                continue
-
-        # Start testing a new potential enclosure
-        if tx is None and (nx, ny) not in already_tested_enclosures:
-            already_tested_enclosures.add((nx, ny))
-            tx, ty, t_dir = cx, cy, dir_index  # Save current state for testing
-            dir_index = (dir_index + 1) % len(directions)  # Rotate to test enclosure
-            if is_horizontal:
-                horizontally_visited.add((cx, cy))
-            else:
-                vertically_visited.add((cx, cy))
+        if grid[nei_row][nei_col] == WALL:
+            dir_index = (dir_index + 1) % len(directions)
             continue
 
-        # Move to the next cell
-        cx, cy = nx, ny
-        continue
+        if grid[nei_row][nei_col] == EMPTY:
 
-    raise Exception(f'Unsupported cell type at ({nx}, {ny}): {grid[nx][ny]}')
+            curr = nei_row, nei_col
+            continue
 
-successful_enclosures.remove((start_x, start_y))
+        raise Exception('should not get here')
 
-# Debug output
-# debug_grid_enclosures()
-print(f'Part 2: {len(successful_enclosures)} loops found')
+
+def walk_till_exit(grid, curr: Tuple[int, int]):
+    dir_index = 0
+    blocks = []
+
+    while True:
+        delta = directions[dir_index]
+        nei_row, nei_col = tuple(map(sum, zip(curr, delta)))
+
+        # finish - we exit the grid
+        if not (0 <= nei_row < len(grid) and 0 <= nei_col < len(grid[0])):
+            return blocks
+
+        # turn, if we hit the wall
+        if grid[nei_row][nei_col] == WALL:
+            dir_index = (dir_index + 1) % len(directions)
+            continue
+
+        # we can walk here
+        if grid[nei_row][nei_col] == EMPTY:
+
+            # let's test if we are in the loop by putting a wall in front of us
+            grid[nei_row][nei_col] = WALL  # set the wall
+            if check_if_loop(grid, dir_index, curr):
+                blocks.append((nei_row, nei_col))
+            grid[nei_row][nei_col] = EMPTY  # revert
+
+            curr = nei_row, nei_col
+            continue
+
+
+def run():
+    grid, start = read_input()
+    blocks = walk_till_exit(grid, start)
+
+    debug_grid(grid, blocks)
+    print(f'Part 2: {len(set(blocks))}')
+
+
+run()
+# 2657 - wrong
+# 1914 - wrong
+# 1781 - wrong
+
