@@ -1,93 +1,76 @@
-with open('python/2024/day12/input.txt') as f:
-    lines = f.read().split('\n')
-    grid = [list(x) for x in lines]
-    # print(grid)
-
-ROWS, COLS = len(grid), len(grid[0])
-EMPTY = '.'
-NORTH, SOUTH, EAST, WEST = (-1, 0), (1, 0), (0, 1), (0, -1)
-
-# wall constants
-SAME, RIGHT, DOWN, RIGHT_DOWN = (0, 0), (0, 1), (1, 0), (1, 1)
-
-# from type import Dict, Set, Tuple
 from collections import defaultdict
 from typing import Dict, Set, Tuple
 
-all_walls: Dict[str, Set[Tuple[int, int]]] = defaultdict(set)
-# all_cells: Dict[str, Set[Tuple[int, int]]] = defaultdict(set)
+def read_grid(file_path):
+    with open(file_path) as f:
+        lines = f.read().split('\n')
+        grid = [list(line) for line in lines]
+    return grid
 
-def solve(row, col, symbol, key):
-    global all_walls, all_cells, grid
+def toggle_wall(wall, key, all_walls):
+    if wall in all_walls[key]:
+        all_walls[key].remove(wall)
+    else:
+        all_walls[key].add(wall)
 
-    # check out of bounds
+def solve(row, col, symbol, key, grid, all_walls, ROWS, COLS):
+    EMPTY = '.'
+    NORTH, SOUTH, EAST, WEST = (-1, 0), (1, 0), (0, 1), (0, -1)
+
+    # Check out of bounds
     if not (0 <= row < ROWS and 0 <= col < COLS):
         return 0
 
-    # check if we have already visited this cell
+    # Check if the cell is already visited or not the target symbol
     if grid[row][col] != symbol:
         return 0
+
     grid[row][col] = EMPTY
-     
-    # all_cells[key].add((row, col))
 
-    # count all walls around the cells. toggle the wall if there is one nearby
-    # for wall in ((cell + SAME, cell + RIGHT, cell + DOWN, cell + RIGHT_DOWN)):
-
+    # Define walls
     walls = [
-        # west wall
-        (row + 0, col + 0, row + 1, col + 0),  
-        
-        # north wall
-        (row + 0, col + 0, row + 0, col + 1),
-        
-        # east wall
-        (row + 0, col + 1, row + 1, col + 1),
-        
-        # south wall
-        (row + 1, col + 0, row + 1, col + 1),
+        (row + 0, col + 0, row + 1, col + 0),  # West wall
+        (row + 0, col + 0, row + 0, col + 1),  # North wall
+        (row + 0, col + 1, row + 1, col + 1),  # East wall
+        (row + 1, col + 0, row + 1, col + 1),  # South wall
     ]
 
     for wall in walls:
-        if wall in all_walls[key]:
-            all_walls[key].remove(wall)
-        else:
-            all_walls[key].add(wall)
+        toggle_wall(wall, key, all_walls)
 
-    # count that the current cell was visited
+    # Count the current cell and explore neighbors
     areas_count = 1
-
-    # go west, east, north, south
-    areas_count += solve(row + NORTH[0], col + NORTH[1], symbol, key)
-    areas_count += solve(row + SOUTH[0], col + SOUTH[1], symbol, key)
-    areas_count += solve(row + EAST[0], col + EAST[1], symbol, key)
-    areas_count += solve(row + WEST[0], col + WEST[1], symbol, key)
+    directions = [NORTH, SOUTH, EAST, WEST]
+    for dr, dc in directions:
+        areas_count += solve(row + dr, col + dc, symbol, key, grid, all_walls, ROWS, COLS)
 
     return areas_count
 
+def calculate_result(areas_dict, all_walls):
+    final_result = 0
+    for area_key, areas_count in areas_dict.items():
+        wall_count = len(all_walls[area_key])
+        final_result += wall_count * areas_count
+    return final_result
 
-areas_dict = {}
-for row in range(ROWS):
-    for col in range(COLS):
-        symbol = grid[row][col]
-        if symbol != EMPTY:
-            # remember the cell. as there can be multiple of
-            key = str(row * 10000000 + col) + symbol
+def main():
+    file_path = 'input.txt'  # Change to the appropriate file path
+    grid = read_grid(file_path)
+    ROWS, COLS = len(grid), len(grid[0])
 
-            areas_count = solve(row, col, symbol, key)
-            areas_dict[key] = areas_count
-            
+    all_walls: Dict[str, Set[Tuple[int, int]]] = defaultdict(set)
+    areas_dict = {}
 
-# print(areas_dict)
-# print(all_walls)
+    for row in range(ROWS):
+        for col in range(COLS):
+            symbol = grid[row][col]
+            if symbol != '.':
+                key = f"{row * 10000000 + col}{symbol}"
+                areas_count = solve(row, col, symbol, key, grid, all_walls, ROWS, COLS)
+                areas_dict[key] = areas_count
 
-final_result = 0
-for area_key, areas_count in areas_dict.items():
-    walls = all_walls[area_key]
-    wall_count = len(walls)
-    # print(area_key, areas_count, wall_count)
-    result = wall_count * areas_count
-    # print(result)
-    final_result += result
+    final_result = calculate_result(areas_dict, all_walls)
+    print(f'Part 1: {final_result}')
 
-print(f'Part 1: {final_result}')
+if __name__ == "__main__":
+    main()
