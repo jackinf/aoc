@@ -1,6 +1,9 @@
 from functools import cache
 
 
+DEBUG = False
+
+
 def read_input():
     with open('input.txt') as f:
         blocks = f.read().split('\n\n')
@@ -19,15 +22,16 @@ def run():
             return True
 
         for pattern in patterns:
-            if design.startswith(pattern):
-                if check_match(design[len(pattern):]):
-                    return True
+            if design.startswith(pattern) and check_match(design[len(pattern):]):
+                return True
 
         return False
 
     matches = 0
     for design_index, design_val in enumerate(designs):
-        print(f"Design '{design_val}': {design_index + 1} out of {len(designs)}")
+        if DEBUG:
+            print(f"Design '{design_val}': {design_index + 1} out of {len(designs)}")
+
         if check_match(design_val):
             matches += 1
 
