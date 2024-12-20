@@ -32,6 +32,7 @@ def heuristic(row, col, end_row, end_col):
 def oob(grid, row, col):
     return not (0 <= row < len(grid) and 0 <= col < len(grid[0]))
 
+# this is probably an overkill: simple BFS could have done a job
 def a_star(grid, start, end):
     costs = defaultdict(lambda: float('inf'))
     costs[start] = 0
@@ -45,9 +46,6 @@ def a_star(grid, start, end):
         if curr in seen:
             continue
         seen.add(curr)
-
-        # if grid[curr[0]][curr[1]] == WALL:
-        #     continue
 
         if curr == end:
             return costs[curr]
