@@ -23,7 +23,7 @@ def find_symbol(grid, symbol):
     raise Exception('not found')
 
 def read_input():
-    with open('sample1.txt') as f:
+    with open('input.txt') as f:
         return [list(line) for line in f.read().split('\n')]
 
 def heuristic(row, col, end_row, end_col):
@@ -63,7 +63,17 @@ def a_star(grid, start, end):
 def analyze_counter(counter, normal_score):
     for k, v in sorted(counter.items(), key=lambda x: x[0], reverse=True):
         saved = normal_score - k
-        print(f'There are {v // 2} cheats that save {saved} picoseconds.')
+        print(f'There are {v} cheats that save {saved} picoseconds.')
+
+
+def debug_grid(grid, marks):
+    for row in range(len(grid)):
+        for col in range(len(grid[0])):
+            if (row, col) in marks:
+                print('O', end='')
+            else:
+                print('.' if grid[row][col] == WALL else ' ', end='')
+        print()
 
 def run():
     grid = read_input()
@@ -83,7 +93,6 @@ def run():
 
     cheats_100ps_or_more = 0
     counter = Counter()
-    seen = {}
     for row in range(1, len(grid) - 1):
         for col in range(1, len(grid[0]) - 1):
             if grid[row][col] == WALL:
@@ -92,23 +101,16 @@ def run():
 
                 grid[row][col] = EMPTY
 
-                # try out 4 combinations by removing 2nd wall
-                for drow, dcol in ((-1, 0), (1, 0), (0, -1), (0, 1)):
-                    nrow, ncol = row + drow, col + dcol
-                    if grid[nrow][ncol] == WALL:
-                        grid[nrow][ncol] = EMPTY
-                        score = a_star(grid, start, end)
-                        counter[score] += 1
-                        if score <= threshold:
-                            cheats_100ps_or_more += 1
-                        grid[nrow][ncol] = WALL
+                score = a_star(grid, start, end)
+                counter[score] += 1
+                if score <= threshold:
+                    cheats_100ps_or_more += 1
 
                 grid[row][col] = WALL
 
+    del counter[normal_score]
     analyze_counter(counter, normal_score)
 
     print(f'Part 1: {cheats_100ps_or_more}')
 
 run()
-
-# 4808 - too high
