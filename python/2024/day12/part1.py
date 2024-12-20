@@ -54,7 +54,7 @@ def calculate_result(areas_dict, all_walls):
     return final_result
 
 def main():
-    file_path = 'input.txt'  # Change to the appropriate file path
+    file_path = 'input.txt'
     grid = read_grid(file_path)
     ROWS, COLS = len(grid), len(grid[0])
 
