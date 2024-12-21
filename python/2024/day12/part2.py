@@ -95,31 +95,43 @@ def count_corners(areas_dict, all_walls):
 
             # print(candidates)
 
-        # count crosses - todo
-
         result = area * corners
         total_result += result
 
     return total_result
 
 
-def count_corners2(areas_dict, all_walls):
-    total_result = 0
-    for area_key, walls in all_walls.items():
-        area = areas_dict[area_key]
+def count_crosses(grid, all_walls):
+    ROWS, COLS = len(grid), len(grid[0])
+    cross_count = 0
 
-        connected = []
+    for row in range(ROWS - 1):
+        for col in range(COLS - 1):
+            # Check if the grid cells satisfy the cross condition
+            if (grid[row][col] == grid[row + 1][col + 1] and
+                    grid[row][col + 1] == grid[row + 1][col] and
+                    grid[row][col] != grid[row + 1][col]):
 
-        turns = 0
-        while walls:
-            curr = walls.pop()
-            for other in walls:
-                if curr[0] == other[0] or curr[1] == other[1]:
-                    pass
+                # Define the walls to check
+                wall_1 = (row + 1, col + 1, row + 1, col + 2)
+                wall_2 = (row + 1, col + 2, row + 1, col + 3)
+                wall_3 = (row, col + 1, row + 1, col + 1)
+                wall_4 = (row, col + 1, row + 2, col + 1)
+
+                # Check if all required walls are present
+                key = grid[row][col]
+                if (wall_1 in all_walls[key] or wall_1[::-1] in all_walls[key]) and \
+                        (wall_2 in all_walls[key] or wall_2[::-1] in all_walls[key]) and \
+                        (wall_3 in all_walls[key] or wall_3[::-1] in all_walls[key]) and \
+                        (wall_4 in all_walls[key] or wall_4[::-1] in all_walls[key]):
+                    cross_count += 1
+
+    return cross_count
 
 
+# the whole solution is wrong
 def main():
-    file_path = 'sample2.txt'  # Change to the appropriate file path
+    file_path = 'sample3.txt'  # Change to the appropriate file path
     grid = read_grid(file_path)
     ROWS, COLS = len(grid), len(grid[0])
 
@@ -134,8 +146,12 @@ def main():
                 areas_count = solve(row, col, symbol, key, grid, all_walls, ROWS, COLS)
                 areas_dict[key] = areas_count
 
+    print(all_walls)
+    print(areas_dict)
     final_result = count_corners(areas_dict, all_walls)
-    print(f'Part 2: {final_result}')
+    crosses_count = count_crosses(grid, all_walls)
+    print(crosses_count)
+    print(f'Part 2: {final_result - crosses_count}')
 
 
 if __name__ == "__main__":
