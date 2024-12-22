@@ -125,88 +125,85 @@ def collect_paths(paths1: List[str], paths2: List[str]):
 @cache
 def calculate_base_cost(path):
     total_cost = 0
-    for i in range(1, len(path)):
-        cost = base_cost(path[i - 1], path[i])
+    path2 = 'A' + path
+    for i in range(1, len(path2)):
+        cost = base_cost(path2[i - 1], path2[i])
         total_cost += cost
     return total_cost
 
 
 @cache
-def get_cost_from_keypad(code: str, depth: int) -> int:
-    prev_code = 'A'
+def get_cost_from_pad(code: str, depth: int, is_numpad=False) -> Tuple[int, str]:
+    print()
+    print(f'Code: {code}, Depth: {depth}')
+    prev = 'A'
 
     acc_cost = 0
+    full_best_path = ''
     for curr in code:
-        source = xy(prev_code, is_numpad=False)
-        target = xy(curr, is_numpad=False)
-        paths = navigate_pad(source, target, is_numpad=False)
+        src = xy(prev, is_numpad=is_numpad)
+        dest = xy(curr, is_numpad=is_numpad)
+        paths = navigate_pad(src, dest, is_numpad=is_numpad)
 
         best_cost = float('inf')
+        best_path = ''
         for path in paths:
             if depth == 0:
-                cost = calculate_base_cost('A' + path)
+                cost = calculate_base_cost(path)
             else:
-                cost = get_cost_from_keypad(path, depth - 1)
+                cost, path = get_cost_from_pad(path, depth - 1, is_numpad=False)  # every depth down is now keypad
 
-            if cost < best_cost:
-                best_cost = cost
-
-            acc_cost += best_cost
-
-    return acc_cost
-
-
-@cache
-def get_pad_presses(code: str, is_numpad: bool = True) -> str:
-    prev_code = 'A'
-
-    best_path = ''
-    best_cost = float('inf')
-    for curr in code:
-        source = xy(prev_code, is_numpad)
-        target = xy(curr, is_numpad)
-        paths = navigate_pad(source, target, is_numpad)
-
-        for path in paths:
-            cost = get_cost_from_keypad(path, 1)
             if cost < best_cost:
                 best_cost = cost
                 best_path = path
-        # paths = collect_paths(combined_paths, paths)
-        # combined_paths.append(paths)
 
-        prev_code = curr
+        print(f'Code: {code}, Depth: {depth}. Best path: {best_path}. Best cost: {best_cost}')
+        acc_cost += best_cost
+        prev = curr
+        full_best_path += best_path
 
-    return best_path
+    return acc_cost, full_best_path
 
 
 def run():
-    lines = read_input('sample2.txt')
+    lines = read_input('input.txt')
 
     final_result = 0
     for code in lines:
-        code3 = get_pad_presses(code, True)
-        # code2 = get_pad_presses(code1, True)
-        # code3 = get_pad_presses(code2, True)
+        cost, path = get_cost_from_pad(code, depth=2, is_numpad=True)
 
-        print(f'{code}: {len(code3)} * {int(code[:-1])}')
-        result = len(code3) * int(code[:-1])
+        print(f'{code}: {len(path)} * {int(code[:-1])}')
+        result = len(path) * int(code[:-1])
         final_result += result
 
     print(f'Part 1: {final_result}')
 
 
 def experiment():
-    cost1 = calculate_base_cost('Av<<A')
-    cost2 = calculate_base_cost('A>^>A')
-    print(cost1, cost2)
+    # cost1 = calculate_base_cost('v<<A')
+    # cost2 = calculate_base_cost('>^>A')
+    # print(cost1, cost2)
+    #
+    # res3 = get_cost_from_pad('^', depth=1)
+    # print(res3)
+    #
+    # res4 = get_cost_from_pad('^<A', depth=1)
+    # print(res4)
 
-    cost3 = get_cost_from_keypad('^', depth=1)
-    print(cost3)
+    cost51, path1 = get_cost_from_pad('029A', depth=2, is_numpad=True)
+    cost52, path2 = get_cost_from_pad('980A', depth=2, is_numpad=True)
+    cost53, path3 = get_cost_from_pad('179A', depth=2, is_numpad=True)
+    cost54, path4 = get_cost_from_pad('456A', depth=2, is_numpad=True)
+    cost55, path5 = get_cost_from_pad('379A', depth=2, is_numpad=True)
+    print(cost51, len(path1))
+    print(cost52, len(path2))
+    print(cost53, len(path3))
+    print(cost54, len(path4))
+    print(cost55, len(path5))
 
 
 if __name__ == '__main__':
-    # run()
-    experiment()
+    run()
+    # experiment()
 
 
