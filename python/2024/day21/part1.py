@@ -2,7 +2,7 @@ from functools import cache
 from typing import List, Tuple
 
 type XY = Tuple[int, int]
-
+DEBUG = False
 numpad = [
     '789',
     '456',
@@ -69,15 +69,12 @@ def xy_num(symbol):
 
 
 def dir_to_arrows(x: int, y: int):
-    hor, ver = '', ''
-
-    if x > 0: hor += '>' * x
-    elif x < 0: hor += '<' * abs(x)
-
-    if y > 0: ver += 'v' * y
-    elif y < 0: ver += '^' * abs(y)
-
-    return hor + ver
+    match y, x:
+        case (1, 0): return 'v'
+        case (-1, 0): return '^'
+        case (0, -1): return '<'
+        case (0, 1): return '>'
+    raise Exception('not supported')
 
 
 @cache
@@ -115,12 +112,6 @@ def read_input(file_name: str):
     with open(file_name) as f:
         return f.read().split('\n')
 
-def collect_paths(paths1: List[str], paths2: List[str]):
-    if len(paths1) == 0:
-        return paths2
-
-    return [path1 + path2 for path1 in paths1 for path2 in paths2]
-
 
 @cache
 def calculate_base_cost(path):
@@ -134,8 +125,9 @@ def calculate_base_cost(path):
 
 @cache
 def get_cost_from_pad(code: str, depth: int, is_numpad=False) -> Tuple[int, str]:
-    print()
-    print(f'Code: {code}, Depth: {depth}')
+    if DEBUG:
+        print()
+        print(f'Code: {code}, Depth: {depth}')
     prev = 'A'
 
     acc_cost = 0
@@ -151,13 +143,15 @@ def get_cost_from_pad(code: str, depth: int, is_numpad=False) -> Tuple[int, str]
             if depth == 0:
                 cost = calculate_base_cost(path)
             else:
+                # use the path from the result
                 cost, path = get_cost_from_pad(path, depth - 1, is_numpad=False)  # every depth down is now keypad
 
             if cost < best_cost:
                 best_cost = cost
                 best_path = path
 
-        print(f'Code: {code}, Depth: {depth}. Best path: {best_path}. Best cost: {best_cost}')
+        if DEBUG:
+            print(f'Code: {code}, Depth: {depth}. Best path: {best_path}. Best cost: {best_cost}')
         acc_cost += best_cost
         prev = curr
         full_best_path += best_path
@@ -172,7 +166,8 @@ def run():
     for code in lines:
         cost, path = get_cost_from_pad(code, depth=2, is_numpad=True)
 
-        print(f'{code}: {len(path)} * {int(code[:-1])}')
+        if DEBUG:
+            print(f'{code}: {len(path)} * {int(code[:-1])}')
         result = len(path) * int(code[:-1])
         final_result += result
 
@@ -180,15 +175,15 @@ def run():
 
 
 def experiment():
-    # cost1 = calculate_base_cost('v<<A')
-    # cost2 = calculate_base_cost('>^>A')
-    # print(cost1, cost2)
-    #
-    # res3 = get_cost_from_pad('^', depth=1)
-    # print(res3)
-    #
-    # res4 = get_cost_from_pad('^<A', depth=1)
-    # print(res4)
+    cost1 = calculate_base_cost('v<<A')
+    cost2 = calculate_base_cost('>^>A')
+    print(cost1, cost2)
+
+    res3 = get_cost_from_pad('^', depth=1)
+    print(res3)
+
+    res4 = get_cost_from_pad('^<A', depth=1)
+    print(res4)
 
     cost51, path1 = get_cost_from_pad('029A', depth=2, is_numpad=True)
     cost52, path2 = get_cost_from_pad('980A', depth=2, is_numpad=True)
