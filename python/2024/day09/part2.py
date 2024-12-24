@@ -21,14 +21,14 @@ def parse_line(line):
 
     # Add initial space block
     # spaces[-1] = 0
-    return files, spaces, id
+    return files, spaces
 
-def work(files, spaces, results) -> bool:
+def step(files, spaces, results) -> bool:
     for file_id in sorted(files.keys(), reverse=True):
         for spaces_id in sorted(spaces.keys(), reverse=False):
             # print(f'Spaces id: {spaces_id}, File id: {file_id}')
             if files[file_id] <= spaces[spaces_id]:
-                print(f'File {file_id} moved into {spaces_id}')
+                # print(f'File {file_id} moved into {spaces_id}')
                 spaces[spaces_id] -= files[file_id]
                 results[spaces_id].append((file_id, files[file_id]))
 
@@ -40,47 +40,45 @@ def work(files, spaces, results) -> bool:
 
     return True
 
-def process_files_and_spaces(files, spaces, last_id):
+def solve(files, spaces):
     results = defaultdict(list)
-    # files_pointer = last_id
-    # id = -1
-    # N = last_id
-
-    # spaces_id = 0
-    # files_id = 0
-
     files2 = files.copy()
+    spaces2 = spaces.copy()
 
     while files and spaces:
-        done = work(files, spaces, results)
+        done = step(files, spaces, results)
 
         if done:
             break
 
     result_str = ''
+    for file_id in sorted(files2.keys(), reverse=False):
+        if file_id in files:
+            result_str += (str(file_id) * files[file_id])
+        else:
+            result_str += ('.' * files2[file_id])
 
-    # files2: defaultdict(<class 'int'>, {0: 2, 1: 3, 2: 1, 3: 3, 4: 2, 5: 4, 6: 4, 7: 3, 8: 4, 9: 2})
-    # results: @defaultdict(<class 'list'>, {0: [(9, 2), (2, 1)], 1: [(7, 3)], 2: [(4, 2)]})
-
-    for file_id in sorted(files.keys(), reverse=False):
-        result_str = result_str + (str(file_id) * files2[file_id])
-
+        occupied_spaces = 0
         for k, v in results[file_id]:
             result_str = result_str + (str(k) * v)
+            occupied_spaces += v
+
+        left_spaces = spaces2[file_id] - occupied_spaces
+        result_str += '.' * left_spaces
 
     return result_str
 
 def calculate_final_result(result):
-    final_result = sum(i * val for i, val in enumerate(result))
+    final_result = sum((0 if k == '.' else int(k)) * i for i, k in enumerate(result))
     return final_result
 
 def main():
     # Change the file path as needed
-    file_path = 'sample.txt'
+    file_path = 'input.txt'
     line = read_input_file(file_path)
 
-    files, spaces, last_id = parse_line(line)
-    result = process_files_and_spaces(files, spaces, last_id)
+    files, spaces = parse_line(line)
+    result = solve(files, spaces)
 
     print(result)
 
@@ -89,3 +87,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# 95174136247 - too low

@@ -1,5 +1,7 @@
 from typing import List
 
+DEBUG = True
+
 
 def read_input_file(file_path):
     with open(file_path) as f:
@@ -27,46 +29,49 @@ def parse_line(line):
     return arr
 
 def calculate_final_result(result):
-    final_result = sum(i * val for i, val in enumerate(result))
+    final_result = sum((0 if k == '.' else int(k)) * i for i, k in enumerate(result))
     return final_result
 
 def solve(arr: List[List[int | None]]):
     in_progress = True
+    prev_res = ''
     while in_progress:
-        spaces, files = [0], [0]
-        for p1 in range(len(arr)):
-            p1_key, p1_space = arr[p1]
-            index_found = -1
-            if p1_key is None:
-                for p2 in range(len(arr) - 1, -1, -1):
-                    if arr[p2][0] is not None and arr[p2][1] <= arr[p1][1]:
-                        index_found = p2
+        for p1 in range(len(arr) - 1, -1, -1):
+            space_index_found = -1
+
+            # is it not the space, but file id/value?
+            if arr[p1][0] is not None:
+                for p2 in range(p1):
+                    if arr[p2][0] is None and arr[p2][1] >= arr[p1][1]:
+                        space_index_found = p2
                         break
 
-                if index_found != -1:
-                    arr[p1][1] -= arr[index_found][1]
-                    arr.insert(p1, [arr[index_found][0], arr[index_found][1]])
-                    arr[index_found + 1][0] = None
+                if space_index_found != -1:
+                    key, val = arr[p1]
+                    arr[space_index_found][1] -= val
+                    arr[p1][0] = None
+                    arr.insert(space_index_found, [key, val])
 
-            if index_found != -1:
+            if space_index_found != -1:
                 break
 
-        # todo: check if finished
-        in_progress = False
-        start = 0
-        for i in range(len(arr)):
-            if arr[i][0] is None:
-                start = i
-                break
+        if DEBUG:
+            print(arr)
+        res = ''
+        for k, v in arr:
+            key = '.' if k is None else str(k)
+            res += key * v
+        if DEBUG:
+            print(res)
+        if prev_res == res:
+            break
+        prev_res = res
 
-        for j in range(start + 1, len(arr)):
-            if arr[j][0] is not None:
-                in_progress = True
-                break
-
-
-        print(spaces, files)
-
+    if DEBUG:
+        print(prev_res)
+    if DEBUG:
+        print(arr)
+    return prev_res
 
 
 def main():
@@ -75,8 +80,11 @@ def main():
     line = read_input_file(file_path)
 
     arr = parse_line(line)
-    print(arr)
-    solve(arr)
+    if DEBUG:
+        print(arr)
+    res = solve(arr)
+    checksum = calculate_final_result(res)
+    print(checksum)
 
 
 if __name__ == "__main__":
