@@ -1,13 +1,29 @@
 from collections import defaultdict
-from typing import Tuple, List, Set
+from typing import Tuple, List, Set, Dict
 
-DEBUG = False
+DEBUG = True
 
 
 def read_input(file_name: str) -> List[Tuple[str, str]]:
     with open(file_name) as f:
         lines = f.read().split('\n')
         return [(line.split('-')[0], line.split('-')[1]) for line in lines]
+
+def bron_kerbosch(acc_result: Set[str], potential: Set[str], excluded: Set[str], graph: Dict[str, Set[str]], cliques: List[Set[str]]):
+    if not potential and not excluded:
+        cliques.append(acc_result)
+        return
+
+    for v in list(potential):
+        bron_kerbosch(
+            acc_result.union({v}),
+            potential.intersection(graph[v]),
+            excluded.intersection(graph[v]),
+            graph,
+            cliques
+        )
+        potential.remove(v)
+        excluded.add(v)
 
 
 def run():
@@ -21,29 +37,13 @@ def run():
     if DEBUG:
         print(graph)
 
-    def dfs(node: str, seen: Set[str]):
-        if node in seen:
-            return
-        seen.add(node)
+    cliques = []
+    bron_kerbosch(set(), set(graph.keys()), set(), graph, cliques)
+    largest_clique = max(cliques, key=len)
 
-        for nei in graph[node]:
-            dfs(nei, seen)
+    password = ','.join(sorted(largest_clique))
+    print(f"Part 2: {password}")
 
-    best = 0
-    final_res = ''
-    for key in graph:
-        seen = set()
-
-        dfs(key, seen)
-        res = len(seen)
-
-        if res > best:
-            best = res
-            final_res = ','.join(sorted(list(seen)))
-            if DEBUG:
-                print(key, res)
-
-    print(f'Part 2: {final_res}')
 
 if __name__ == '__main__':
     run()
