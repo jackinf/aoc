@@ -1,88 +1,83 @@
-from collections import defaultdict
+from typing import List
+
+DEBUG = False
+
 
 def read_input_file(file_path):
     with open(file_path) as f:
         return f.read()
 
 def parse_line(line):
-    spaces = defaultdict(int)
-    files = defaultdict(int)
+    file_id = 0
+    arr = []
     index = 0
-    id = -1
 
     while index < len(line):
-        id += 1
-        files[id] = int(line[index])
+        # for _ in range(int(line[index])):
+        arr.append([file_id, int(line[index])])
         index += 1
 
-        if index < len(line):
-            spaces[id] = int(line[index])
-            index += 1
-
-    return files, spaces
-
-def step(files, spaces, results) -> bool:
-    for file_id in sorted(files.keys(), reverse=True):
-        for spaces_id in sorted(spaces.keys(), reverse=False):
-            if files[file_id] <= spaces[spaces_id]:
-                spaces[spaces_id] -= files[file_id]
-                results[spaces_id].append((file_id, files[file_id]))
-
-                del files[file_id]
-
-                return False
-
-    return True
-
-def solve(files, spaces):
-    results = defaultdict(list) # collect all the movements of the file here
-
-    # as we will modify the arrays (by subtracting or removing values)
-    files2 = files.copy()
-    spaces2 = spaces.copy()
-
-    while files and spaces:
-        done = step(files, spaces, results)
-
-        if done:
+        if index >= len(line):
             break
 
-    # construct the answer
-    result = []
-    for file_id in sorted(files2.keys(), reverse=False):
-        val = str(file_id) if file_id in files else '.'
-        for _ in range(files2[file_id]):
-            result.append(val)
+        # for _ in range(int(line[index])):
+        arr.append([None, int(line[index])])
+        index += 1
 
-        left_spaces = spaces2[file_id]
-        for k, v in results[file_id]:
-            for _ in range(v):
-                result.append(str(k))
-            left_spaces -= v
+        file_id += 1
 
-        for _ in range(left_spaces):
-            result.append('.')
+    return arr
 
-    return result
+def max_id(data: list):
+    return max(map(lambda x: x[0], filter(lambda x: x[0] is not None, data)))
 
-def calculate_final_result(result):
-    final_result = sum((0 if k == '.' else int(k)) * i for i, k in enumerate(result))
-    return final_result
+def find_pos(data, id):
+    return next(i for i, v in enumerate(data) if v[0] == id)
+
+def subst(arr, p1, p2):
+    file, space = arr[p1], arr[p2]
+    diff = file[1] - space[1]
+
+    if diff < 0:
+        arr[p2] = (file[0], file[1])
+        arr[p1] = (None, arr[p1][1])
+        arr.insert(p2 + 1, (None, abs(diff)))
+    elif diff == 0:
+        arr[p2] = (file[0], file[1])
+        arr[p1] = (None, arr[p1][1])
+
+def solve(data: List[List[int | None]]):
+    curr_id = max_id(data)
+
+    while curr_id > 0:
+        p1 = find_pos(data, curr_id)
+
+        for p2, _ in filter(lambda x: x[1][0] is None and x[0] < p1, enumerate(data)):
+            if data[p2][1] >= data[p1][1]:
+                subst(data, p1, p2)
+                break
+
+        curr_id -= 1
+
+    res = []
+    for k, v in data:
+        key = 0 if k is None else k
+        for _ in range(v):
+            res.append(key)
+    return sum([i * v for i,v in enumerate(res)])
+
 
 def main():
-    file_path = 'sample1.txt'
+    # Change the file path as needed
+    file_path = 'input.txt'
     line = read_input_file(file_path)
 
-    files, spaces = parse_line(line)
-    result = solve(files, spaces)
+    arr = parse_line(line)
+    if DEBUG:
+        print(arr)
+    res = solve(arr)
+    print(f'Part 2: {res}')
 
-    print(result)
-
-    final_result = calculate_final_result(result)
-    print(f'Part 2: {final_result}')
 
 if __name__ == "__main__":
     main()
-
-# 95174136247 - too low
-# 8456900406063 - too high
