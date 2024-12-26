@@ -5,23 +5,37 @@ content = '1'
 # content = '77 515 6779622 6 91370 959685 0 9861'
 stones = list(map(int, content.split()))
 
-for i in range(75):
-    tmp = []
+def next_stones(stone):
+    if stone == 0:
+        return [1]
 
-    for stone in stones:
-        stone_str = str(stone)
-        N = len(stone_str)
+    stone_str, N = str(stone), len(str(stone))
+    if N % 2 == 0:
+        return [int(stone_str[:N//2]), int(stone_str[N//2:])]
 
-        if stone == 0:
-            tmp.append(1)
-        elif N % 2 == 0:
-            left, right = stone_str[:N//2], stone_str[N//2:]
-            tmp.append(int(left))
-            tmp.append(int(right))
-        else:
-            tmp.append(stone * 2024)
+    return [stone * 2024]
 
-    stones = tmp
-    print(i, len(stones))
+def next_state(arrangement):
+    new_arrangement = {}
+    for stone in arrangement.keys():
+        new_stones = next_stones(stone)
+        for new_stone in new_stones:
+            if new_arrangement.get(new_stone) is None:
+                new_arrangement[new_stone] = 0
+            new_arrangement[new_stone] += arrangement[stone]
+    return new_arrangement
 
-print(f'Part 2: {len(stones)}')
+
+def run():
+    with open('input.txt') as f:
+        stones = {i: 1 for i in map(int, f.read().split())}
+
+    for _ in range(75):
+        stones = next_state(stones)
+
+    print(f'Part 2: {sum(stones.values())}')
+
+if __name__ == '__main__':
+    run()
+
+# 223767210249237
