@@ -1,4 +1,5 @@
 from re import findall
+from typing import Iterable
 
 PART_2_INCREASE = 10_000_000_000_000
 
@@ -28,8 +29,8 @@ def find_intersection(
     return a, b
 
 
-def parse_ints(param):
-    pass  # todo
+def parse_ints(l: Iterable[str]) -> list[int]:
+    return [int(i) for i in l]
 
 
 class Solution():

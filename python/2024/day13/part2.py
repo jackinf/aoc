@@ -1,69 +1,49 @@
-with open('sample.txt') as f:
-    blocks_raw = f.read().split('\n\n')
+def read_input(file_name: str):
+    with open(file_name) as f:
+        blocks_raw = f.read().split('\n\n')
 
-A_COST = 3
-B_COST = 1
-DEBUG = False
-BONUS = 10000000000000
+    for block_index, block_raw in enumerate(blocks_raw):
+        lines = block_raw.split('\n')
+        a_xy = lines[0].split(':')[1]
+        b_xy = lines[1].split(':')[1]
+        pr_xy = lines[2].split(':')[1]
 
+        ax, ay = [int(val[3:]) for val in a_xy.split(',')]
+        bx, by = [int(val[3:]) for val in b_xy.split(',')]
+        prx, pry = [int(val[3:]) for val in pr_xy.split(',')]
 
-# debug printer
-def pr(output, *args, **kwargs):
-    if DEBUG:
-        print(output, *args, **kwargs)
+        BONUS = 10000000000000
+        yield ax, ay, bx, by, prx + BONUS, pry + BONUS
 
+"""
+- a_x * a + b_x * b = x_prize
+- a_y * a + b_y * b = y_prize
+"""
+def find_intersection(
+    a_x: int, a_y: int, b_x: int, b_y: int, x_prize: int, y_prize: int
+) -> tuple[float, float]:
+    a_x_with_b_y = a_x * b_y
+    x_prize_with_b_y = x_prize * b_y
+    a_y_with_b_x = a_y * b_x
+    y_prize_with_b_x = y_prize * b_x
+    a = (x_prize_with_b_y - y_prize_with_b_x) / (a_x_with_b_y - a_y_with_b_x)
+    b = (y_prize - a_y * a) / b_y
+    return a, b
 
-def find_candidates(steps_per_a_press, steps_per_b_press, target_steps, a_press_cost, b_press_cost):
-    # make sure that A > B
-    if steps_per_a_press < steps_per_b_press:
-        return find_candidates(steps_per_b_press, steps_per_a_press, target_steps, b_press_cost, a_press_cost)
+def solve(blocks):
+    total = 0
+    for block in blocks:
+        a, b = find_intersection(*block)
+        if a.is_integer() and b.is_integer():
+            total += a * 3 + b
+    return total
 
-    max_a_button_presses = target_steps // steps_per_a_press
-    candidates = set()
+def run():
+    blocks = list(read_input('input.txt'))
+    print(blocks)
 
-    # going from higher to lower makes sure that the result tokens are going from lower to higher
-    for a_presses in range(max_a_button_presses, -1, -1):
-        a_steps = a_presses * steps_per_a_press
-        remainder_steps = target_steps - a_steps
-        b_presses_div_remainder = remainder_steps % steps_per_b_press
+    final_result = solve(blocks)
+    print(f'Part 2: {final_result}')  # 47954945384809 vs 77407675412647
 
-        if b_presses_div_remainder == 0:
-            b_presses = remainder_steps // steps_per_b_press
-            tokens = a_presses * a_press_cost + b_presses * b_press_cost
-            pr(f'found! A presses={a_presses} B presses={b_presses} tokens={tokens}')
-
-            if a_press_cost == A_COST and b_press_cost == B_COST:
-                candidates.add((a_presses, b_presses))
-            else:
-                candidates.add((b_presses, a_presses))
-
-    return candidates
-
-
-final_result = 0
-for block_index, block_raw in enumerate(blocks_raw):
-    pr(f'BLOCK {block_index + 1}')
-
-    lines = block_raw.split('\n')
-    a_xy = lines[0].split(':')[1]
-    b_xy = lines[1].split(':')[1]
-    pr_xy = lines[2].split(':')[1]
-
-    ax, ay = [int(val[3:]) for val in a_xy.split(',')]
-    bx, by = [int(val[3:]) for val in b_xy.split(',')]
-    prx, pry = [int(val[3:]) + BONUS for val in pr_xy.split(',')]
-
-    x_candidates = find_candidates(ax, bx, prx, A_COST, B_COST)
-    y_candidates = find_candidates(ay, by, pry, A_COST, B_COST)
-
-    common = sorted(list(x_candidates & y_candidates))
-    if len(common) > 0:
-        a_presses, b_presses = common[0]
-        result = a_presses * A_COST + b_presses * B_COST
-        final_result += result
-        pr(f'Found {result}')
-    else:
-        pr('No matches found')
-
-
-print(f'Part 2: {final_result}')
+if __name__ == '__main__':
+    run()
