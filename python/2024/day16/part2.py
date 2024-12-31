@@ -1,108 +1,61 @@
-import heapq
-from collections import defaultdict
-
-EAST = (0, 1)
-WEST = (0, -1)
-NORTH = (-1, 0)
-SOUTH = (1, 0)
-
-DIRS = [EAST, SOUTH, WEST, NORTH]
-
-WALL = '#'
-EMPTY = '.'
-
-STEP_COST = 1
-TURN_COST = 1000
+from heapq import heappush, heappop
+from typing import Optional, Set, Tuple
 
 
-def read_input():
-    with open('sample1.txt') as f:
-        lines = f.read().split('\n')
+def read_input(file_name: str):
+    with open(file_name) as f:
+        return [list(x) for x in f.read().split('\n')]
 
-    return [list(x) for x in lines]
+def find_paths(grid) -> Set[Set[Tuple[int, int]]]:
+    start = next((row_i, col_i) for row_i, row in enumerate(grid) for col_i, cell in enumerate(row) if cell == 'S')
+    end = next((row_i, col_i) for row_i, row in enumerate(grid) for col_i, cell in enumerate(row) if cell == 'E')
 
+    # print(start, end)
 
-def get_symbol(grid, symbol):
-    return next((i, j) for i, row in enumerate(grid) for j, cell in enumerate(row) if cell == symbol)
+    directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+    heap = [(0, 0, start[0], start[1], {start})]
+    best_paths = set()
+    visited = {}
+    lowest_score: Optional[int] = None
 
+    while heap:
+        score, dir_i, row, col, path = heappop(heap)
 
-def heuristic(curr_row, curr_col, end_row, end_col):
-    return abs(curr_row - end_row) + abs(curr_col - end_col)
-
-
-def reconstruct_all_paths(parent_map, start, end):
-    all_paths = []
-
-    def backtrack(node, path):
-        if node == start:
-            all_paths.append(path[::-1])
-            return
-
-        for parent in parent_map.get(node, []):
-            backtrack(parent, path + [node])
-
-    backtrack(end, [])
-    return all_paths
-
-
-def traverse_grid(grid):
-    start = get_symbol(grid, 'S')
-    end = get_symbol(grid, 'E')
-    end_row, end_col = end
-
-    q = [(0, 0, start)]  # score, dir, start_row, start_col
-    costs = defaultdict(lambda: float('inf'))
-    costs[start] = 0
-    parent_map = {start: []}
-
-    while q:
-        score, dir_index, curr = heapq.heappop(q)
-
-        if curr == end:
+        if grid[row][col] == '#':
             continue
 
-        for delta, turn_cost in [(0, 0), (-1, TURN_COST), (1, TURN_COST)]:
-            new_dir_index = (dir_index + delta) % len(DIRS)
-            row_delta, col_delta = DIRS[new_dir_index]
-            curr_row, curr_col = curr
-            next_row, next_col = curr_row + row_delta, curr_col + col_delta
-            nei = (next_row, next_col)
+        if lowest_score and lowest_score < score:
+            break
 
-            if 0 <= next_row < len(grid) and 0 <= next_col < len(grid[0]) and grid[next_row][next_col] != WALL:
-                new_cost = costs[curr] + STEP_COST + turn_cost
+        if (row, col) == end:
+            lowest_score = score
+            best_paths |= path
+            continue
 
-                if new_cost < costs[nei]:
-                    costs[nei] = new_cost
-                    h = heuristic(next_row, next_col, end_row, end_col)
-                    heapq.heappush(q, (new_cost + h, new_dir_index, nei))
+        visited_key = (row, col, dir_i)
+        prev_score = visited.get(visited_key)
+        if prev_score and prev_score < score:
+            continue
+        visited[visited_key] = score
 
-                    if nei not in parent_map:
-                        parent_map[nei] = []
-                    parent_map[nei].append(curr)
+        # go forward
+        drow, dcol = directions[dir_i]
+        nrow, ncol = row + drow, col + dcol
+        heappush(heap, (score + 1, dir_i, nrow, ncol, path | {(nrow, ncol)}))
 
-    return reconstruct_all_paths(parent_map, start, end)
+        # turn left
+        heappush(heap, (score + 1000, (dir_i - 1) % 4, row, col, path))
 
+        # turn right
+        heappush(heap, (score + 1000, (dir_i + 1) % 4, row, col, path))
 
-def debug_grid(grid, paths):
-    unique_cells = set([x for y in paths for x in y])
-
-    for row in range(len(grid)):
-        for col in range(len(grid[0])):
-            if (row, col) in unique_cells:
-                print('O', end='')
-            else:
-                print(grid[row][col], end='')
-        print()
+    return best_paths
 
 
 def run():
-    grid = read_input()
-    paths = traverse_grid(grid)
-
-    print(len(set([x for y in paths for x in y])))
-    # print(f'Part 2: {len(set(paths))}')
-
-    debug_grid(grid, paths)
+    grid = read_input('input.txt')
+    paths = find_paths(grid)
+    print(f'Part 2: {len(paths)}')  # 489
 
 
 if __name__ == '__main__':
