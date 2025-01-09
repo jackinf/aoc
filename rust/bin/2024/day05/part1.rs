@@ -1,26 +1,22 @@
 use std::collections::{HashMap, HashSet};
 
-fn parse_rules(block1: &str) -> Result<HashMap<i32, HashSet<i32>>, String> {
-    let rules: Result<HashMap<i32, HashSet<i32>>, String> = block1
+fn parse_rules(block: &str) -> Result<HashMap<i32, HashSet<i32>>, &str> {
+    block
         .split('\n')
         .map(|line| {
             let mut parts = line.split('|');
 
             let left = parts
                 .next()
-                .ok_or("Missing left part".to_string())
-                .and_then(|s| {
-                    s.parse::<i32>()
-                        .map_err(|_| "Invalid number for left part".to_string())
-                })?;
+                .ok_or("Missing left part")?
+                .parse::<i32>()
+                .map_err(|_| "Invalid number for left part")?;
 
             let right = parts
                 .next()
-                .ok_or("Missing right part".to_string())
-                .and_then(|s| {
-                    s.parse::<i32>()
-                        .map_err(|_| "Invalid number for right part".to_string())
-                })?;
+                .ok_or("Missing right part")?
+                .parse::<i32>()
+                .map_err(|_| "Invalid number for right part")?;
 
             Ok((left, right))
         })
@@ -32,32 +28,24 @@ fn parse_rules(block1: &str) -> Result<HashMap<i32, HashSet<i32>>, String> {
                     acc.entry(left).or_insert_with(HashSet::new).insert(right);
                     acc
                 })
-        });
-    rules
+        })
 }
 
-fn parse_sections(block2: &str) -> Result<Vec<Vec<i32>>, String> {
-    let sections: Result<Vec<Vec<i32>>, String> = block2
+fn parse_sections(block: &str) -> Result<Vec<Vec<i32>>, &str> {
+    block
         .split('\n')
         .map(|line| {
             line.split(',')
-                .map(|symbol| {
-                    symbol
-                        .parse::<i32>()
-                        .map_err(|_| "Invalid number".to_string())
-                })
+                .map(|symbol| symbol.parse::<i32>().map_err(|_| "Invalid number"))
                 .collect()
         })
-        .collect::<Result<Vec<_>, _>>();
-    sections
+        .collect::<Result<Vec<_>, _>>()
 }
 
-fn analyze_section(section: &Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) -> i32 {
-    for i in 0..section.len() - 1 {
-        for j in i..section.len() {
-            let p1: i32 = section[i];
-            let p2: i32 = section[j];
 
+fn analyze_section(section: &Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) -> i32 {
+    for (i, &p1) in section.iter().enumerate() {
+        for &p2 in &section[i + 1..] {
             if let Some(collection) = &rules.get(&p2) {
                 if collection.contains(&p1) {
                     return 0;
@@ -69,8 +57,8 @@ fn analyze_section(section: &Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) -> i3
     section[section.len() / 2]
 }
 
-pub fn main() -> Result<(), String> {
-    let content: String = include_str!("input.txt").to_string();
+pub fn main() -> Result<(), &'static str> {
+    let content: &str = include_str!("input.txt");
     let mut blocks = content.split("\n\n");
 
     let block1 = blocks.next().ok_or("Missing block 1")?;
