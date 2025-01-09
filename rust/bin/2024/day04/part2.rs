@@ -16,7 +16,7 @@ pub fn main() {
             if (input[i - 1][j - 1] == 'M' && input[i + 1][j + 1] == 'S'
                 || input[i - 1][j - 1] == 'S' && input[i + 1][j + 1] == 'M')
                 && (input[i - 1][j + 1] == 'M' && input[i + 1][j - 1] == 'S'
-                || input[i - 1][j + 1] == 'S' && input[i + 1][j - 1] == 'M')
+                    || input[i - 1][j + 1] == 'S' && input[i + 1][j - 1] == 'M')
             {
                 ans += 1;
             }

@@ -15,7 +15,9 @@ pub fn main() {
             "don't" => enabled = false,
             "mul" => {
                 if enabled {
-                    let values_str = group_str[4..group_str.len() - 1].split(',').collect::<Vec<_>>();
+                    let values_str = group_str[4..group_str.len() - 1]
+                        .split(',')
+                        .collect::<Vec<_>>();
                     let val1 = values_str[0].parse::<i32>().unwrap();
                     let val2 = values_str[1].parse::<i32>().unwrap();
 
