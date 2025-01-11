@@ -1,4 +1,5 @@
 from itertools import cycle
+import time
 
 def parse_grid(input_lines):
     """Parses the grid from input."""
@@ -123,6 +124,9 @@ if __name__ == "__main__":
     with open("input.txt") as f:
         input_lines = f.read().splitlines()
 
+    start_time = time.time()
     result = solve(input_lines)
+    end_time = time.time()
     print(f"Part 1: {result[0]}")
     print(f"Part 2: {result[1]}")
+    print(f"Time: {end_time - start_time} seconds")

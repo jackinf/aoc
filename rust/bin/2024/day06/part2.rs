@@ -3,6 +3,7 @@ mod common;
 use common::get_start;
 use common::parse_grid;
 use std::collections::HashSet;
+use std::time::Instant;
 
 /// Traverses the grid to determine if a loop occurs.
 ///
@@ -93,6 +94,7 @@ fn out_of_bounds(grid: &Vec<Vec<char>>, nx: i32, ny: i32) -> bool {
 
 pub fn main() -> Result<(), String> {
     let content = include_str!("input.txt");
+    let timer = Instant::now();
 
     let mut grid: Vec<Vec<char>> = parse_grid(content);
 
@@ -115,7 +117,9 @@ pub fn main() -> Result<(), String> {
         set_cell_value(&mut grid, row, col, '.')?;
     }
 
-    println!("Part 2: {}", obstacles); // 1704
+    let duration = timer.elapsed();
+    println!("Part 2: {}", obstacles); // 1703
+    println!("Time: {:.2?}", duration);
 
     Ok(())
 }
