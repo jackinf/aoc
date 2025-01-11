@@ -1,6 +1,6 @@
 import sys
 
-with open('sample1.txt') as f:
+with open('input.txt') as f:
     grid = [list(x) for x in f.read().splitlines()]
 
 # find x,y position of ^ character
