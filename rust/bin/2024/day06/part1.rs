@@ -1,20 +1,9 @@
 use std::collections::HashSet;
 
-fn get_start(grid: &Vec<Vec<char>>) -> Result<(i32, i32), String> {
-    grid.iter()
-        .enumerate()
-        .flat_map(|(i, row)| {
-            row.iter().enumerate().filter_map(move |(j, &ch)| {
-                if ch == '^' {
-                    Some((i as i32, j as i32))
-                } else {
-                    None
-                }
-            })
-        })
-        .next() // Get the first matching element
-        .ok_or_else(|| "No start found".to_string())
-}
+mod common;
+
+use crate::common::parse_grid;
+use common::get_start;
 
 fn traverse_grid(grid: &[Vec<char>], i: i32, j: i32) -> Result<usize, String> {
     let directions: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
@@ -57,10 +46,7 @@ fn traverse_grid(grid: &[Vec<char>], i: i32, j: i32) -> Result<usize, String> {
 pub fn main() -> Result<(), String> {
     let content = include_str!("input.txt");
 
-    let mut grid: Vec<Vec<char>> = content
-        .lines() // Use `lines()` to handle splitting into lines
-        .map(|line| line.chars().collect())
-        .collect();
+    let mut grid: Vec<Vec<char>> = parse_grid(content);
 
     // Find the starting position ('^') in the grid
     let start: (i32, i32) = get_start(&grid)?; // Convert None to an error
