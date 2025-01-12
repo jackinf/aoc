@@ -1,5 +1,9 @@
+import time
+
 with open('input.txt') as f:
     lines = f.readlines()
+
+start_time = time.time()
 
 final_result = 0
 for i, line in enumerate(lines):
@@ -24,3 +28,6 @@ for i, line in enumerate(lines):
         q.append((right_index + 1, int(str(ans) + str(right[right_index]))))
 
 print(f'Part 2: {final_result}')
+
+end_time = time.time()
+print(f"Time: {end_time - start_time} seconds")
