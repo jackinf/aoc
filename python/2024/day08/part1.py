@@ -1,7 +1,8 @@
 from collections import defaultdict
+from pprint import pprint
 
 # with open('sample.txt') as f:
-with open('input.txt') as f:
+with open('sample1.txt') as f:
     lines = f.read().split('\n')
     grid = [list(line) for line in lines]
 
@@ -16,6 +17,9 @@ for row_i, row in enumerate(grid):
 
 del type_coords['.']
 
+print("type_coords")
+pprint(type_coords)
+
 # find pairs
 pairs = defaultdict(list)
 for type, coords in type_coords.items():
@@ -25,6 +29,9 @@ for type, coords in type_coords.items():
         for j in range(i + 1, len(coords)):
             coord2 = coords[j]
             pairs[type].append((coord1, coord2))
+
+print("pairs")
+pprint(pairs)
 
 # calculate distance between each pair
 results = set()
@@ -36,6 +43,9 @@ for type, type_pairs in pairs.items():
         results.add((type, nx1, ny1))
         results.add((type, nx2, ny2))
 
+print("results")
+pprint(results)
+
 # remove out of bounds
 results2 = set()
 for type, row, col in results:
@@ -45,6 +55,8 @@ for type, row, col in results:
     grid[row][col] = '#'
     results2.add((row, col))
 
+print("results2")
+pprint(results2)
 
 def debug_grid():
     for row in range(M):
