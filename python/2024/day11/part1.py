@@ -1,4 +1,4 @@
-# with open('python/2024/day11/sample.txt') as f:
+# with open('python/2024/day11/sample1.txt') as f:
     # content = f.read()
 content = '125 17'
 # content = '0 1 10 99 999'

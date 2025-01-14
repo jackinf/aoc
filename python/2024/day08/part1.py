@@ -1,7 +1,7 @@
 from collections import defaultdict
 from pprint import pprint
 
-# with open('sample.txt') as f:
+# with open('sample1.txt') as f:
 with open('sample1.txt') as f:
     lines = f.read().split('\n')
     grid = [list(line) for line in lines]

@@ -1,4 +1,4 @@
-with open('python/2024/day10/sample.txt') as f:
+with open('./input.txt') as f:
     grid = [[int(y) for y in x] for x in f.read().split('\n')]
     # print(grid)
 
@@ -30,7 +30,6 @@ for start_row, start_col in starts:
         (start_row + LEFT[0], start_col + LEFT[1], 0),
         (start_row + RIGHT[0], start_col + RIGHT[1], 0),
     ]
-    seen = set()
 
     while q:
         row, col, prev_value = q.pop(0)

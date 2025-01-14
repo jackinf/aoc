@@ -152,7 +152,7 @@ def part2(sb_pairs: List[SbPair]):
 
 
 if __name__ == '__main__':
-    # filename, y = ('sample.txt', 10)
+    # filename, y = ('sample1.txt', 10)
     filename, y = ('input.txt', 2_000_000)
 
     with open(filename) as f:

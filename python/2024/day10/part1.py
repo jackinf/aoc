@@ -1,4 +1,4 @@
-with open('python/2024/day10/input.txt') as f:
+with open('./input.txt') as f:
     grid = [[int(y) for y in x] for x in f.read().split('\n')]
     # print(grid)
 
@@ -10,7 +10,7 @@ for row in range(ROWS):
         if grid[row][col] == 0:
             starts.append((row, col))
 
-# print(starts)
+print(starts)
 
 UP = (-1, 0)
 DOWN = (1, 0)

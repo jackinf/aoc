@@ -53,7 +53,7 @@ def calculate_final_result(result):
 
 def main():
     # Change the file path as needed
-    line = read_input_file('sample.txt')
+    line = read_input_file('sample1.txt')
     # line = read_input_file('input.txt')
 
     files, spaces, last_id = parse_line(line)
