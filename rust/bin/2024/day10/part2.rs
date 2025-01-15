@@ -1,5 +1,5 @@
 use log::debug;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{VecDeque};
 
 type Grid = Vec<Vec<i32>>;
 
@@ -46,7 +46,7 @@ fn traverse(grid: &Grid, start: (i32, i32)) -> Result<i32, String> {
     while !queue.is_empty() {
         let (row, col, prev_value) = queue.pop_front().ok_or_else(|| "err".to_string())?;
 
-        if out_of_bounds(&grid, row, col) {
+        if out_of_bounds(grid, row, col) {
             continue;
         }
 

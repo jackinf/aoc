@@ -1,6 +1,6 @@
 // https://github.com/hasanghorbel/aoc-2024/blob/master/day04/src/part2/mod.rs
 pub fn main() {
-    let input: Vec<Vec<char>> = include_str!("../input.txt")
+    let input: Vec<Vec<char>> = include_str!("./input.txt")
         .lines()
         .map(|line| line.chars().collect())
         .collect();

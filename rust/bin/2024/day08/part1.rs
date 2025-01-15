@@ -49,7 +49,7 @@ pub fn main() {
             let coord1 = coords[i];
             for j in i+1..coords.len() {
                 let coord2 = coords[j];
-                pairs.entry(*symbol).or_insert_with(Vec::new).push((coord1, coord2));
+                pairs.entry(*symbol).or_default().push((coord1, coord2));
             }
         }
     }
