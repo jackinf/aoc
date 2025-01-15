@@ -38,7 +38,7 @@ pub fn main() -> Result<(), String> {
     let content = include_str!("./input.txt");
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
 
-    let mut stones: Vec<i64> = content
+    let stones: Vec<i64> = content
         .split_whitespace()
         .map(|item| {
             item.parse::<i64>()

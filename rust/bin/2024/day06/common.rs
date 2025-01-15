@@ -5,7 +5,7 @@ pub fn parse_grid(content: &str) -> Vec<Vec<char>> {
         .collect()
 }
 
-pub fn get_start(grid: &Vec<Vec<char>>) -> Result<(i32, i32), String> {
+pub fn get_start(grid: &[Vec<char>]) -> Result<(i32, i32), String> {
     grid.iter()
         .enumerate()
         .flat_map(|(i, row)| {

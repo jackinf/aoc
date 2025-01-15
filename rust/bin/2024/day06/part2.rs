@@ -19,14 +19,14 @@ use std::time::Instant;
 ///     * `Vec<(i32, i32)>` contains the visited locations.
 ///     * `String` contains an error message if an error occurs.
 fn traverse_grid(
-    grid: &Vec<Vec<char>>,
+    grid: &[Vec<char>],
     start: &(i32, i32),
 ) -> Result<(bool, HashSet<(i32, i32)>), String> {
     let directions: [(i32, i32); 4] = [(-1, 0), (0, 1), (1, 0), (0, -1)];
     let mut dir_index = 0;
     let mut visited: HashSet<(i32, i32, i32, i32)> = HashSet::new();
 
-    let (mut cx, mut cy) = start.clone();
+    let (mut cx, mut cy) = *start;
     let (dx, dy) = get_direction(directions, dir_index)?;
     visited.insert((cx, cy, dx, dy));
 
@@ -35,8 +35,9 @@ fn traverse_grid(
         let (nx, ny) = (cx + dx, cy + dy);
 
         if out_of_bounds(grid, nx, ny) {
-            let locs: HashSet<(i32, i32)> = visited.iter()
-                .map(|(x, y, dx, dy)| (*x, *y))
+            let locs: HashSet<(i32, i32)> = visited
+                .iter()
+                .map(|(x, y, _dx, _dy)| (*x, *y))
                 // .filter(|coord| coord != start)
                 .collect();
 
@@ -71,24 +72,24 @@ fn get_direction(directions: [(i32, i32); 4], dir_index: usize) -> Result<(i32, 
         .ok_or_else(|| "failed to get dir".to_string())
 }
 
-fn set_cell_value(grid: &mut Vec<Vec<char>>, row: i32, col: i32, val: char) -> Result<(), String> {
+fn set_cell_value(grid: &mut [Vec<char>], row: i32, col: i32, val: char) -> Result<(), String> {
     let cell = grid
         .get_mut(row as usize)
         .and_then(|item| item.get_mut(col as usize))
-        .ok_or_else(|| "Failed to get cell")?;
+        .ok_or("Failed to get cell")?;
 
     *cell = val;
 
     Ok(())
 }
 
-fn get_cell_value(grid: &Vec<Vec<char>>, nx: i32, ny: i32) -> Result<&char, String> {
+fn get_cell_value(grid: &[Vec<char>], nx: i32, ny: i32) -> Result<&char, String> {
     grid.get(nx as usize)
         .and_then(|item| item.get(ny as usize))
         .ok_or_else(|| "No such cell".to_string())
 }
 
-fn out_of_bounds(grid: &Vec<Vec<char>>, nx: i32, ny: i32) -> bool {
+fn out_of_bounds(grid: &[Vec<char>], nx: i32, ny: i32) -> bool {
     !(0 <= nx && nx < grid.len() as i32 && 0 <= ny && ny < grid[0].len() as i32)
 }
 

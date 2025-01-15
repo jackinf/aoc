@@ -1,8 +1,8 @@
-use std::cmp;
-use std::cmp::min;
-use std::collections::{HashMap, HashSet};
 use log::debug;
-use env_logger;
+use std::cmp;
+use std::collections::{HashMap, HashSet};
+
+type Coord = (i32, i32);
 
 fn debug_grid(grid: &[Vec<char>]) {
     for row in grid {
@@ -16,7 +16,8 @@ pub fn main() {
 
     let content = include_str!("sample1.txt");
 
-    let mut grid: Vec<Vec<char>> = content.lines()
+    let mut grid: Vec<Vec<char>> = content
+        .lines()
         .map(|line| line.chars().collect::<Vec<char>>())
         .collect();
 
@@ -26,14 +27,14 @@ pub fn main() {
     debug_grid(&grid);
 
     // find coordinates
-    let mut type_coords: HashMap<char, HashSet<(i32, i32)>> = HashMap::new();
+    let mut type_coords: HashMap<char, HashSet<Coord>> = HashMap::new();
     for (row_i, row) in grid.iter().enumerate() {
         for (col_i, val) in row.iter().enumerate() {
             // let (x, y) = (row_i.min(col_i), row_i.max(col_i));
             let x = cmp::min(row_i, col_i) as i32;
             let y = cmp::max(row_i, col_i) as i32;
 
-            type_coords.entry(*val).or_insert_with(HashSet::new).insert((x, y));
+            type_coords.entry(*val).or_default().insert((x, y));
         }
     }
     type_coords.remove(&'.');
@@ -42,13 +43,12 @@ pub fn main() {
     debug!("{:?}", type_coords);
 
     // find pairs
-    let mut pairs: HashMap<char, Vec<((i32, i32), (i32, i32))>> = HashMap::new();
+    let mut pairs: HashMap<char, Vec<(Coord, Coord)>> = HashMap::new();
     for (symbol, coords) in type_coords.iter() {
-        let coords: Vec<(i32, i32)> = coords.iter().cloned().collect();
+        let coords: Vec<Coord> = coords.iter().cloned().collect();
         for i in 0..coords.len() - 1 {
             let coord1 = coords[i];
-            for j in i+1..coords.len() {
-                let coord2 = coords[j];
+            for &coord2 in coords.iter().skip(i + 1) {
                 pairs.entry(*symbol).or_default().push((coord1, coord2));
             }
         }

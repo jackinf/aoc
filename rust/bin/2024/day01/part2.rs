@@ -35,9 +35,8 @@ fn main() {
     }
 
     let mut final_result = 0;
-    for i in 0..lefts.len() {
-        let left = lefts[i];
-        let score = *similarity_scores.get(&left).unwrap_or(&0);
+    for left in &lefts {
+        let score = *similarity_scores.get(left).unwrap_or(&0);
         let result = left * score;
         final_result += result;
     }

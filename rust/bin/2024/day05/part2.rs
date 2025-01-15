@@ -5,7 +5,7 @@ mod common;
 use common::parse_rules;
 use common::parse_sections;
 
-fn is_valid_section(section: &Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) -> bool {
+fn is_valid_section(section: &[i32], rules: &HashMap<i32, HashSet<i32>>) -> bool {
     for (i, p1) in section.iter().enumerate() {
         for p2 in &section[i + 1..] {
             if let Some(collection) = rules.get(p2) {
@@ -19,7 +19,7 @@ fn is_valid_section(section: &Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) -> b
     true
 }
 
-fn fix_section_v2(section: &mut Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) -> i32 {
+fn fix_section_v2(section: &mut [i32], rules: &HashMap<i32, HashSet<i32>>) -> i32 {
     for i in 0..section.len() {
         for j in (i + 1)..section.len() {
             let p1 = &section[i];
@@ -36,7 +36,7 @@ fn fix_section_v2(section: &mut Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) ->
 }
 
 #[allow(dead_code)]
-fn fix_section_v1(section: &mut Vec<i32>, rules: &HashMap<i32, HashSet<i32>>) -> i32 {
+fn fix_section_v1(section: &mut [i32], rules: &HashMap<i32, HashSet<i32>>) -> i32 {
     for i in 0..section.len() {
         for j in (i + 1)..section.len() {
             if let Some(collection) = rules.get(&section[j]) {

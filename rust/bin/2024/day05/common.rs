@@ -22,12 +22,13 @@ pub fn parse_rules(block: &str) -> Result<HashMap<i32, HashSet<i32>>, &str> {
         })
         .collect::<Result<Vec<_>, _>>()
         .map(|pairs| {
-            pairs
-                .into_iter()
-                .fold(HashMap::new(), |mut acc, (left, right)| {
-                    acc.entry(left).or_insert_with(HashSet::new).insert(right);
+            pairs.into_iter().fold(
+                HashMap::new(),
+                |mut acc: HashMap<i32, HashSet<i32>>, (left, right)| {
+                    acc.entry(left).or_default().insert(right);
                     acc
-                })
+                },
+            )
         })
 }
 

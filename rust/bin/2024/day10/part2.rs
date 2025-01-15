@@ -1,5 +1,5 @@
 use log::debug;
-use std::collections::{VecDeque};
+use std::collections::VecDeque;
 
 type Grid = Vec<Vec<i32>>;
 

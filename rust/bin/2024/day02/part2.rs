@@ -18,7 +18,7 @@ pub fn main() {
 
             for i in 1..nums.len() {
                 let diff = nums[i] - nums[i - 1];
-                if !(1 <= diff && diff <= 3) {
+                if !(1..=3).contains(&diff) {
                     safe_asc = false;
                     break;
                 }
@@ -26,7 +26,7 @@ pub fn main() {
 
             for i in 1..nums.len() {
                 let diff = nums[i] - nums[i - 1];
-                if !(-3 <= diff && diff <= -1) {
+                if !(-3..=-1).contains(&diff) {
                     safe_desc = false;
                     break;
                 }

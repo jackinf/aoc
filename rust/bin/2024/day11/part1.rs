@@ -5,7 +5,10 @@ pub fn main() -> Result<(), String> {
 
     let mut stones: Vec<i64> = content
         .split_whitespace()
-        .map(|item| item.parse::<i64>().map_err(|_| "failed to parse integer".to_string()))
+        .map(|item| {
+            item.parse::<i64>()
+                .map_err(|_| "failed to parse integer".to_string())
+        })
         .collect::<Result<Vec<i64>, String>>()?;
 
     for _ in 0..25 {
@@ -23,8 +26,12 @@ pub fn main() -> Result<(), String> {
                 // let left: String = stone_str.chars().take(size / 2).collect();
                 // let right: String = stone_str.chars().skip(size / 2).take(size / 2).collect();
 
-                let left: i64 = left.parse::<i64>().map_err(|_| "failed to parse integer".to_string())?;
-                let right: i64 = right.parse::<i64>().map_err(|_| "failed to parse integer".to_string())?;
+                let left: i64 = left
+                    .parse::<i64>()
+                    .map_err(|_| "failed to parse integer".to_string())?;
+                let right: i64 = right
+                    .parse::<i64>()
+                    .map_err(|_| "failed to parse integer".to_string())?;
 
                 tmp.push(left);
                 tmp.push(right);

@@ -53,7 +53,7 @@ pub fn main() -> Result<(), String> {
     let (i, j) = start;
     grid[i as usize][j as usize] = '.'; // Replace the start with a '.'
 
-    let result = traverse_grid(&mut grid, i, j)?;
+    let result = traverse_grid(&grid, i, j)?;
 
     println!("Part 1: {}", result);
 
