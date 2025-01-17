@@ -4,14 +4,11 @@ type Wall = (i32, i32, i32, i32);
 type AllWalls = HashMap<String, HashSet<Wall>>;
 
 fn read_grid(content: &str) -> Vec<Vec<char>> {
-    content
-        .lines()
-        .map(|row| row.chars().collect())
-        .collect()
+    content.lines().map(|row| row.chars().collect()).collect()
 }
 
 fn toggle_wall(wall: &Wall, key: String, all_walls: &mut AllWalls) {
-    let walls = all_walls.entry(key).or_insert_with(HashSet::new);
+    let walls = all_walls.entry(key).or_default();
     if walls.contains(wall) {
         walls.remove(wall);
     } else {
@@ -19,17 +16,16 @@ fn toggle_wall(wall: &Wall, key: String, all_walls: &mut AllWalls) {
     }
 }
 
-fn toggle_wall2(wall: Wall, key: &str, all_walls: &mut AllWalls) {
-    let walls = all_walls.entry(key.to_string()).or_insert_with(HashSet::new);
-    if walls.contains(&wall) {
-        walls.remove(&wall);
-    } else {
-        walls.insert(wall);
-    }
-}
-
-
-fn solve(row: i32, col: i32, symbol: char, key: String, grid: &mut Vec<Vec<char>>, all_walls: &mut AllWalls, height: i32, width: i32) -> Option<i32> {
+fn solve(
+    row: i32,
+    col: i32,
+    symbol: char,
+    key: String,
+    grid: &mut Vec<Vec<char>>,
+    all_walls: &mut AllWalls,
+) -> Option<i32> {
+    let width = grid.first()?.len() as i32;
+    let height = grid.len() as i32;
     let empty = '.';
     let directions: [(i32, i32); 4] = [(-1, 0), (1, 0), (0, 1), (0, -1)];
 
@@ -47,13 +43,13 @@ fn solve(row: i32, col: i32, symbol: char, key: String, grid: &mut Vec<Vec<char>
     //     *cell = empty;
     // }
 
-    match grid.get_mut(row as usize).and_then(|row_vec| row_vec.get_mut(col as usize)) {
-        Some(item) if *item == symbol => {
-            *item = empty
-        },
+    match grid
+        .get_mut(row as usize)
+        .and_then(|row_vec| row_vec.get_mut(col as usize))
+    {
+        Some(item) if *item == symbol => *item = empty,
         _ => return None,
     }
-
 
     // if row < 0 || col < 0 || row >= height || col >= width {
     //     return None;
@@ -65,13 +61,12 @@ fn solve(row: i32, col: i32, symbol: char, key: String, grid: &mut Vec<Vec<char>
     //
     // grid[row as usize][col as usize] = empty;
 
-
     // Define walls
     let walls = [
-        (row + 0, col + 0, row + 1, col + 0),
-        (row + 0, col + 0, row + 0, col + 1),
-        (row + 0, col + 1, row + 1, col + 1),
-        (row + 1, col + 0, row + 1, col + 1),
+        (row, col, row + 1, col),
+        (row, col, row, col + 1),
+        (row, col + 1, row + 1, col + 1),
+        (row + 1, col, row + 1, col + 1),
     ];
 
     for wall in walls {
@@ -80,7 +75,7 @@ fn solve(row: i32, col: i32, symbol: char, key: String, grid: &mut Vec<Vec<char>
 
     let mut areas_count = 1;
     for (dr, dc) in directions {
-        if let Some(res) = solve(row + dr, col + dc, symbol, key.clone(), grid, all_walls, height, width) {
+        if let Some(res) = solve(row + dr, col + dc, symbol, key.clone(), grid, all_walls) {
             areas_count += res;
         }
     }
@@ -104,7 +99,7 @@ pub fn main() -> Result<(), String> {
 
     // read grid
     let mut grid: Vec<Vec<char>> = read_grid(content);
-    let width = grid.get(0).ok_or("no such element".to_string())?.len();
+    let width = grid.first().ok_or("no such element".to_string())?.len();
     let height = grid.len();
 
     let mut all_walls: AllWalls = HashMap::default();
@@ -115,7 +110,14 @@ pub fn main() -> Result<(), String> {
             let symbol = grid[row][col];
             if symbol != '.' {
                 let key = format!("{}{}", row * 100000 + col, symbol);
-                if let Some(areas_count) = solve(row as i32, col as i32, symbol, key.clone(), &mut grid, &mut all_walls, height as i32, width as i32) {
+                if let Some(areas_count) = solve(
+                    row as i32,
+                    col as i32,
+                    symbol,
+                    key.clone(),
+                    &mut grid,
+                    &mut all_walls,
+                ) {
                     areas.entry(key).or_insert_with(|| areas_count);
                 }
             }

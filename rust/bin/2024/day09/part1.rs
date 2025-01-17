@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use log::debug;
+use std::collections::HashMap;
 
 pub fn main() {
     let content = include_str!("sample1.txt").to_string();
@@ -45,7 +45,7 @@ pub fn main() {
         if files[&files_pointer] == 0 {
             files.remove(&files_pointer);
             files_pointer -= 1;
-            continue
+            continue;
         }
 
         if spaces[&id] == 0 {
@@ -54,7 +54,7 @@ pub fn main() {
             for _ in 0..files[&id] {
                 results.push(id);
             }
-            continue
+            continue;
         }
 
         files.insert(files_pointer, files[&files_pointer] - 1);
@@ -65,10 +65,11 @@ pub fn main() {
     // calculate final result
     // let final_result = results.iter().enumerate().map(|(i, val)| i as i32 * val).fold(|acc, val| acc + val, 0);
 
-    let final_result = results.iter()
+    let final_result: i32 = results
+        .iter()
         .enumerate()
         .map(|(i, val)| i as i32 * val)
-        .fold(0, |acc, val| acc + val);
+        .sum();
 
     println!("Part 1: {}", final_result);
 }
