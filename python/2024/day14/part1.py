@@ -1,5 +1,6 @@
 from collections import Counter
 from functools import reduce
+from pprint import pprint
 from typing import Tuple, List
 
 
@@ -80,6 +81,7 @@ def debug_grid(state: ROBOTS):
 
 def run():
     robots = read_input()
+    pprint(robots)
 
     for second in range(MAX_SECONDS):
         if second == 0:
