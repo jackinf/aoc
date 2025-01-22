@@ -8,6 +8,7 @@ log = "0.4.22"
 regex = "1.11.1"
 env_logger = "0.11.6"
 anyhow = "1.0.95"
+thiserror = "2.0.11"
 
 [[bin]]
 name = "2024_day01_part1"
@@ -122,9 +123,17 @@ name = "2024_day14_part2"
 path = "bin/2024/day14/part2.rs"
 
 [[bin]]
-name = "2024_day15_part1"
+name = "2024_day16_part1"
 path = "bin/2024/day16/part1.rs"
 
 [[bin]]
-name = "2024_day15_part2"
+name = "2024_day16_part2"
 path = "bin/2024/day16/part2.rs"
+
+[[bin]]
+name = "2024_dayxx_part1"
+path = "bin/2024/dayxx/part1.rs"
+
+[[bin]]
+name = "2024_dayxx_part2"
+path = "bin/2024/dayxx/part2.rs"
