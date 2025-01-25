@@ -17,6 +17,4 @@ pub fn main() -> Result<()> {
     };
 
     // println!("Part 1: {}", final_result);
-
-    Ok(())
 }
