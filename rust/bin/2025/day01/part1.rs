@@ -38,5 +38,5 @@ fn main() {
         }
     }
 
-    print!("{}", password);
+    println!("{}", password);
 }

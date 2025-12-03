@@ -168,4 +168,4 @@ path = "bin/2025/day01/part1.rs"
 
 [[bin]]
 name = "2025_day01_part2"
-path = "bin/2025/day02/part2.rs"
+path = "bin/2025/day01/part2.rs"
