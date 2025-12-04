@@ -3,7 +3,7 @@ use log::{debug, info};
 fn main() {
     env_logger::init();
 
-    let contents: &str = include_str!("sample0.txt");
+    let contents: &str = include_str!("input.txt");
     let lines: Vec<&str> = contents.split("\n").collect();
     
     let mut result: u32 = 0;
@@ -31,7 +31,35 @@ fn to_nums(line: &str) -> Vec<u32> {
 }
 
 fn get_biggest_num(nums: &Vec<u32>) -> u32 {
-    0
+    if nums.len() <= 1 {
+        return 0
+    }
+
+    // find first biggest number pos
+    let mut p1: usize = 0;
+    let mut p1_best = 0;
+    for candidate in (1..=9).rev() {
+        for i in 0..(nums.len() - 1) {
+            if nums[i] > p1_best {
+                p1_best = nums[i];
+                p1 = i;
+            }
+        }
+    }
+
+    // now find the second biggest number after the first number
+    let mut p2: usize = 0;
+    let mut p2_best = 0;
+    for candidate in (1..=9).rev() {
+        for i in ((p1 + 1)..nums.len()) {
+            if nums[i] > p2_best {
+                p2_best = nums[i];
+                p2 = i;
+            }
+        }
+    }
+
+    p1_best * 10 + p2_best
 }
 
 #[cfg(test)]
