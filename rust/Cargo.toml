@@ -10,6 +10,7 @@ env_logger = "0.11.6"
 anyhow = "1.0.95"
 thiserror = "2.0.11"
 fancy-regex = "0.13"
+test-case = "3.3.1"
 
 [[bin]]
 name = "2024_day01_part1"
@@ -178,3 +179,11 @@ path = "bin/2025/day02/part1.rs"
 [[bin]]
 name = "2025_day02_part2"
 path = "bin/2025/day02/part2.rs"
+
+[[bin]]
+name = "2025_day03_part1"
+path = "bin/2025/day03/part1.rs"
+
+[[bin]]
+name = "2025_day03_part2"
+path = "bin/2025/day03/part2.rs"
