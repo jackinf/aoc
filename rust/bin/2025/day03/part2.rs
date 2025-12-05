@@ -6,14 +6,14 @@ fn main() {
     let contents: &str = include_str!("input.txt");
     let lines: Vec<&str> = contents.split("\n").collect();
     
-    let mut result: u32 = 0;
+    let mut result: u64 = 0;
 
     for line in lines {
-        let nums: Vec<u32> = to_nums(&line);
+        let nums: Vec<u64> = to_nums(&line);
 
         debug!("{:?}", nums);
 
-        let biggest = get_biggest_num(&nums);
+        let biggest = get_biggest_num(&nums, 12);
         debug!("BIGGEST NUM = {}", biggest);
 
         result += biggest;
@@ -22,64 +22,38 @@ fn main() {
     info!("{}", result);
 }
 
-fn to_nums(line: &str) -> Vec<u32> {
-    let nums: &Vec<u32> = &line.chars()
-        .map(|ch| ch.to_digit(10).unwrap())
+fn to_nums(line: &str) -> Vec<u64> {
+    let nums: &Vec<u64> = &line.chars()
+        .map(|ch| u64::from(ch.to_digit(10).unwrap()))
         .collect();
 
     nums.to_vec()
 }
 
-fn get_three_smallest_num(nums: &Vec<u32>) -> u32 {
-    if nums.len() <= 1 {
-        return 0
-    }
-
-    // find first biggest number pos
-    let mut p1: usize = 0;
-    let mut p1_best = 10;
-    for candidate in 1..=9 {
-        for i in 0..(nums.len() - 2) {
-            if nums[i] < p1_best {
-                p1_best = nums[i];
-                p1 = i;
+fn get_biggest_num(nums: &Vec<u64>, count: usize) -> u64 {    
+    let mut result: u64 = 0;
+    let mut start_pos = 0;
+    
+    for position in 0..count {
+        let remaining_needed = count - position - 1;        
+        let search_end = nums.len() - remaining_needed;
+        
+        let mut best_digit = 0;
+        let mut best_pos = start_pos;
+        
+        for i in start_pos..search_end {
+            if nums[i] > best_digit {
+                best_digit = nums[i];
+                best_pos = i;
             }
         }
+        
+        result *= 10;
+        result += best_digit;
+        start_pos = best_pos + 1;
     }
-
-    // now find the second biggest number after the first number
-    let mut p2: usize = 0;
-    let mut p2_best = 10;
-    for candidate in 1..=9 {
-        for i in (p1 + 1)..nums.len() - 1 {
-            if nums[i] < p2_best {
-                p2_best = nums[i];
-                p2 = i;
-            }
-        }
-    }
-
-    // now find the second biggest number after the first number
-    let mut p3: usize = 0;
-    let mut p3_best = 10;
-    for candidate in 1..=9 {
-        for i in (p2 + 1)..nums.len() {
-            if nums[i] < p3_best {
-                p3_best = nums[i];
-                p3 = i;
-            }
-        }
-    }
-
-    dbg!("P1 = {:?}", p1);
-    dbg!("P2 = {:?}", p2);
-    dbg!("P3 = {:?}", p3);
-
-    p1_best * 100 + p2_best * 10 + p3_best
-}
-
-fn get_biggest_num(nums: &Vec<u32>) -> u32 {
-    todo!()
+    
+    result
 }
 
 #[cfg(test)]
@@ -88,13 +62,13 @@ mod tests {
 
     use test_case::test_case;
 
-    #[test_case("987654321111111", 111)]
-    #[test_case("811111111111119", 111)]
-    #[test_case("234234234234278", 232)] // TODO: not sure how to solve this now
-    #[test_case("818181911112111", 111)]
-    fn test_get_three_smallest_num(raw: &str, expected: u32) {
-        let nums1: Vec<u32> = to_nums(raw);
-        let res1 = get_three_smallest_num(&nums1);
+    #[test_case("987654321111111", 987654321111)]
+    #[test_case("811111111111119", 811111111119)]
+    #[test_case("234234234234278", 434234234278)]
+    #[test_case("818181911112111", 888911112111)]
+    fn test_get_biggest_num(raw: &str, expected: u64) {
+        let nums1: Vec<u64> = to_nums(raw);
+        let res1 = get_biggest_num(&nums1, 12);
 
         assert_eq!(res1, expected)
     }
