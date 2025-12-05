@@ -1,76 +1,57 @@
-use log::info;
+use log::{debug, info};
+use std::collections::VecDeque;
 
 fn main() {
     env_logger::init();
 
-    let contents: &str = include_str!("input.txt");
-    let mut grid: Vec<Vec<char>> = contents.split("\n")
-        .map(|line| line.chars().collect::<Vec<char>>())
-        .collect();
+    let contents = include_str!("sample0.txt");
+    let groups: Vec<&str> = contents.split("\n\n").collect();
+    let group0_raw = groups[0].split("\n").collect::<Vec<&str>>();
 
-    dbg!("{:?}", grid[1][3]);
+    let mut ranges = group0_raw.into_iter()
+        .map(|item| {
+            let parts = item.split("-").collect::<Vec<&str>>();
+            let left = parts[0].parse::<u128>().unwrap();
+            let right = parts[1].parse::<u128>().unwrap();
 
-    let mut total_removals = 0;
-    let mut curr_removals = 1; // in order to get into the while loop
+            (left, right)
+        })
+        .collect::<Vec<(u128, u128)>>();
 
-    while curr_removals > 0 {
-        curr_removals = 0;
+    ranges.sort();
 
-        let mut cells_to_remove: Vec<(usize, usize)> = Vec::new();
-        for row in 0..grid.len() {
-            for col in 0..grid[0].len() {
-                if grid[row][col] == '@' {
-                    if count_adjacent(&grid, row, col) < 4 {
-                        cells_to_remove.push((row, col));
-                    }
-                }
-            }
+    // merge ranges
+    let mut deque: VecDeque<(u128, u128)> = VecDeque::new();
+    for (s1, e1) in ranges {
+        if deque.is_empty() {
+            deque.push_back((s1, e1));
+            continue;
         }
 
-        for (row, col) in cells_to_remove {
-            grid[row][col] = '.'; // clean up 
-            curr_removals += 1;
-            total_removals += 1;
+        let (s2, e2) = deque.back_mut().unwrap();
+
+        if *e2 >= s1 {
+            *e2 = e1.max(*e2);
+            continue;
         }
-    }
 
-    info!("{total_removals}");
-}
+        if *s2 >= s1 {
+            panic!("Should not happen");
+        }
 
-fn count_adjacent(grid: &Vec<Vec<char>>, row: usize, col: usize) -> usize {
-    let mut adjacents: usize = 0;
-
-    let directions = [
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1),           (0, 1),
-        (1, -1),  (1, 0),  (1, 1),
-    ];
-
-    for (dr, dc)  in directions {
-        if matches!(
-            grid
-                .get(row.wrapping_add_signed(dr))
-                .and_then(|r| r.get(col.wrapping_add_signed(dc))),
-            Some(&'@')
-        ) {
-            adjacents += 1;
+        if *e2 < s1 {
+            deque.push_back((s1, e1));
+            continue;
         }
     }
 
-    adjacents
-}
+    debug!("{:?}", deque);
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    let mut result = 0;
 
-    #[test]
-    fn test_count_adjacent() {
-        let grid: Vec<Vec<char>> = vec!(
-            vec!['.','.','@','@','.','@','@','@','@'],
-            vec!['@','@','@','.','@','.','@','.','@']
-        );
-
-        assert_eq!(count_adjacent(&grid, 1, 1), 3);
+    for (start, end) in deque {
+        result += end - start + 1;
     }
+
+    info!("{result}");
 }
