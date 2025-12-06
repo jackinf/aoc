@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "2025 Day 6 Part 2",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/2025_day06_part2",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "cargo build day06_part2"
+        },
+        {
+            "name": "2025 Day 6 Part 1",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/debug/2025_day06_part1",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "cargo build day06_part1"
+        }
+    ]
+}

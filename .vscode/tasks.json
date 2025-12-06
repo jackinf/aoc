@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "cargo build",
+            "type": "shell",
+            "command": "cargo",
+            "args": ["build"],
+            "options": {
+                "cwd": "${workspaceFolder}/rust"
+            },
+            "problemMatcher": ["$rustc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "cargo run",
+            "type": "cargo",
+            "command": "run",
+            "problemMatcher": ["$rustc"]
+        }
+    ]
+}
