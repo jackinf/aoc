@@ -2,10 +2,10 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "cargo build day06_part2",
+            "label": "cargo build day07_part1",
             "type": "cargo",
             "command": "build",
-            "args": ["--bin", "2025_day06_part2"],
+            "args": ["--bin", "2025_day07_part1"],
             "problemMatcher": ["$rustc"]
         }
     ]
