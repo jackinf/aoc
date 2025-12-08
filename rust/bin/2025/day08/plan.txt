@@ -1,0 +1,27 @@
+node to circuit map
+    100,200,300 - 1
+    102,202,102 - 1
+    500,304,594 - 2
+
+circuit_map_joints
+    1 - 2
+
+circuit_counter = 3
+
+create N x N pairs with distances -> sort by distance -> VecDeque<A, B, dist>
+
+for P times:
+    take front node
+    
+    check if A and B are in circuit map
+    if none:
+        add under same circuit circuit_counter, increase +1
+    if A:
+        add B under A's circuit number
+    if B:
+        add A under B's circuit number
+    if both:
+        add A's and B's into circuit_map_joints
+        # or just update all B's circuit numbers with A's circuit numbers for now
+
+

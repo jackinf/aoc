@@ -7,7 +7,7 @@ type Grid = Vec<Vec<char>>;
 fn main() {
     env_logger::init();
 
-    let contents = include_str!("input.txt");
+    let contents = include_str!("sample0.txt");
     let grid: Grid = contents.lines()
         .map(|line| line.chars().collect())
         .collect();
